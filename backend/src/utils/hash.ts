@@ -1,4 +1,6 @@
 import argon2 from 'argon2';
+import { AppError } from '@errors/AppError';
+import { AUTH_ERRORS } from '@constants/errors';
 
 /**
  * Hashes a user's plaintext password using argon2.
@@ -21,4 +23,19 @@ export async function comparePassword(
   hashedPassword: string
 ): Promise<boolean> {
   return await argon2.verify(hashedPassword, plainPassword);
+}
+
+/**
+ * Compares a password and throws if not matched.
+ * Useful in services like AuthService.
+ */
+
+export async function verifyPasswordOrThrow(
+  inputPassword: string,
+  hashedPassword: string
+): Promise<void> {
+  const isMatch = await comparePassword(inputPassword, hashedPassword);
+  if (!isMatch) {
+    throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS, 401);
+  }
 }

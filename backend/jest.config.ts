@@ -20,6 +20,9 @@ const config: JestConfigWithTsJest = {
     '^@models/(.*)$': '<rootDir>/models/$1',
     '^@utils/(.*)$': '<rootDir>/utils/$1',
     '^@test-utils/(.*)$': '<rootDir>/utils/test/$1',
+    '^@validations/(.*)$': '<rootDir>/validations/$1',
+    '^@constants/(.*)$': '<rootDir>/constants/$1',
+    '^@schemas/(.*)$': '<rootDir>/schemas/$1',
   },
 
   collectCoverage: true,

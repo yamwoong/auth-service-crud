@@ -16,7 +16,10 @@ if (error) {
 export const env = {
   nodeEnv: envVars.NODE_ENV,
   port: Number(envVars.PORT),
-  mongoUri: envVars.MONGODB_URI, // ✅ 요거
+  mongoUri: envVars.MONGODB_URI,
   jwtSecret: envVars.JWT_SECRET,
+  jwtExpiresIn: envVars.JWT_EXPIRES_IN,
+  refreshSecret: envVars.JWT_REFRESH_SECRET,
+  refreshExpiresIn: envVars.JWT_REFRESH_EXPIRES_IN,
   redisUrl: envVars.REDIS_URL || '',
 };

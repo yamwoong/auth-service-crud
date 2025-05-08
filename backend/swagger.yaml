@@ -1,0 +1,174 @@
+# ──────────────────────────────────────────────
+# Auth Service API Specification
+# ──────────────────────────────────────────────
+openapi: 3.0.0
+info:
+  title: Auth Service API
+  version: 1.0.0
+
+# ──────────────────────────────────────────────
+# Server Configuration
+# ──────────────────────────────────────────────
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  # ──────────────────────────────────────────────
+  # Health-check Endpoint
+  # ──────────────────────────────────────────────
+  /ping:
+    get:
+      summary: Health check
+      tags:
+        - System
+      responses:
+        '200':
+          description: pong
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  # ──────────────────────────────────────────────
+  # User Management Endpoints
+  # ──────────────────────────────────────────────
+  /users:
+    get:
+      summary: Retrieve all users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    post:
+      summary: Register a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        '201':
+          description: Created — returns the new user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '409':
+          description: Conflict — email or username already exists
+
+  # ──────────────────────────────────────────────
+  # Authentication Endpoints
+  # ──────────────────────────────────────────────
+  /auth/login:
+    post:
+      summary: User login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Login successful — returns JWT and user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Unauthorized — invalid credentials
+        '400':
+          description: Bad Request — missing required fields
+
+components:
+  # ──────────────────────────────────────────────
+  # Schema Definitions
+  # ──────────────────────────────────────────────
+  schemas:
+    # ──────────────────────────────────────────────
+    # DTO for creating a new user
+    # ──────────────────────────────────────────────
+    CreateUserDto:
+      type: object
+      required:
+        - username
+        - email
+        - name
+        - password
+      properties:
+        username:
+          type: string
+          description: User-defined login ID
+        email:
+          type: string
+          format: email
+          description: Unique email address
+        name:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+
+    # ──────────────────────────────────────────────
+    # User model representation
+    # ──────────────────────────────────────────────
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+      example:
+        id: '636d1234abcd5678ef901234'
+        username: 'default-user'
+        email: 'default@example.com'
+        name: 'Default Name'
+
+    # ──────────────────────────────────────────────
+    # DTO for user login credentials
+    # ──────────────────────────────────────────────
+    LoginDto:
+      type: object
+      required:
+        - identifier
+        - password
+      properties:
+        identifier:
+          type: string
+          description: Email or username for login
+        password:
+          type: string
+          writeOnly: true
+
+    # ──────────────────────────────────────────────
+    # Response schema after successful login
+    # ──────────────────────────────────────────────
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        user:
+          $ref: '#/components/schemas/User'

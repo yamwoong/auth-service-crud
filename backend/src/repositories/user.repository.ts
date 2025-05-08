@@ -3,6 +3,7 @@ import { CreateUserDto } from '../dtos/user/create-user.dto';
 import { User } from '../models/user.model';
 import { mapMongoUserToUser } from '../mappers/user.mapper';
 import { UserModel } from '../schemas/user.schema';
+import { MongoUser } from '../models/user-with-password.model';
 
 @Service()
 export class UserRepository {
@@ -32,9 +33,8 @@ export class UserRepository {
    * Commonly used for login or email duplication checks.
    */
 
-  async findByEmail(email: string): Promise<User | null> {
-    const found = await UserModel.findOne({ email }).lean();
-    return found ? mapMongoUserToUser(found) : null;
+  async findByEmail(email: string): Promise<MongoUser | null> {
+    return await UserModel.findOne({ email }).select('+password').lean<MongoUser>();
   }
 
   /**
@@ -42,9 +42,17 @@ export class UserRepository {
    * Used in login or username duplication checks.
    */
 
-  async findByUsername(username: string): Promise<User | null> {
-    const found = await UserModel.findOne({ username }).lean();
-    return found ? mapMongoUserToUser(found) : null;
+  async findByUsername(username: string): Promise<MongoUser | null> {
+    return await UserModel.findOne({ username }).select('+password').lean<MongoUser>();
+  }
+
+  /**
+   * Finds a user by ID.
+   * Used in auth middleware (JWT validation).
+   */
+
+  async findById(id: string): Promise<MongoUser | null> {
+    return await UserModel.findById(id).lean<MongoUser>();
   }
 
   /**

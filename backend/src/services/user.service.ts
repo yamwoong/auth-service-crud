@@ -5,7 +5,7 @@ import { UserRepository } from '../repositories/user.repository';
 import { CreateUserDto } from '../dtos/user/create-user.dto';
 import { User } from '@models/user.model';
 import { UserAlreadyExistsError } from '../errors/UserAlreadyExistsError';
-import { hashPassword } from '@utils/hahs';
+import { hashPassword } from '@utils/hash';
 
 @Service()
 export class UserService {

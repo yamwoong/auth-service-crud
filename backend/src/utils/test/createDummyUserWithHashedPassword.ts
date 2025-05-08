@@ -1,5 +1,5 @@
 import { CreateUserDto } from '@dtos/user/create-user.dto';
-import { hashPassword } from '@utils/hahs';
+import { hashPassword } from '@utils/hash';
 import {
   TEST_USER_EMAIL,
   TEST_USER_NAME,
