@@ -2,7 +2,7 @@ import { Container } from 'typedi';
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '@dtos/user/create-user.dto';
-import { createUserSchema } from '@validations/user.schema';
+import { createUserSchema } from '@validations/user.validation';
 import { asyncHandler } from '@utils/asyncHandler';
 
 const userService = Container.get(UserService);

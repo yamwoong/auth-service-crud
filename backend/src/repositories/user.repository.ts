@@ -52,7 +52,7 @@ export class UserRepository {
    */
 
   async findById(id: string): Promise<MongoUser | null> {
-    return await UserModel.findById(id).lean<MongoUser>();
+    return await UserModel.findById(id).select('+password');
   }
 
   /**
@@ -90,5 +90,22 @@ export class UserRepository {
     }
     // If the stored document's email matches, it's an email conflict
     return user.email === email ? 'email' : 'username';
+  }
+
+  /**
+   * Updates a user's password.
+   * This operation is used in password change and reset flows.
+   * Only updates the password field.
+   *
+   * @param userId - The user's MongoDB ID
+   * @param hashedPassword - The new password hash to store
+   */
+
+  async updatePassword(userId: string, hashedPassword: string): Promise<void> {
+    await UserModel.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: false, lean: true }
+    );
   }
 }

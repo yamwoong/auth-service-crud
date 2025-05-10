@@ -1,14 +1,15 @@
-import { Service } from 'typedi';
+import { Container, Service } from 'typedi';
 import { LoginDto } from '@dtos/auth/login.dto';
 import { UserRepository } from '@repositories/user.repository';
 import { verifyPasswordOrThrow } from '@utils/hash';
-import { signAuthToken, signRefreshToken } from '@utils/jwt';
+import { signAuthToken, signRefreshToken, verifyRefreshToken } from '@utils/jwt';
 import { AppError } from '@errors/AppError';
 import { AUTH_ERRORS } from '@constants/errors';
 import { mapMongoUserToUser } from '@mappers/user.mapper';
 import { RefreshTokenModel } from '@schemas/refresh-token.schema';
 import { User } from '@models/user.model';
 import { MongoUser } from '@models/user-with-password.model';
+import { UserService } from '@services/user.service';
 
 @Service()
 export class AuthService {
@@ -25,17 +26,45 @@ export class AuthService {
 
     await verifyPasswordOrThrow(password, userEntity.password);
 
-    const accessToken = signAuthToken(userEntity._id.toString());
-    const refreshToken = signRefreshToken(userEntity._id.toString());
+    const userId = userEntity._id.toString();
+
+    const accessToken = signAuthToken(userId);
+    const refreshToken = signRefreshToken(userId);
 
     await RefreshTokenModel.create({
-      userId: userEntity._id,
+      userId: userId,
       token: refreshToken,
     });
 
     const user = mapMongoUserToUser(userEntity); // safe response
 
     return { token: accessToken, refreshToken, user };
+  }
+
+  /**
+   * Validates a refresh token, rotates it, and issues a new access + refresh token.
+   */
+
+  async refreshToken(token: string): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = verifyRefreshToken(token);
+    const userId = payload.userId;
+
+    const existing = await RefreshTokenModel.findOne({ token });
+    if (!existing) {
+      throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS, 401);
+    }
+
+    await existing.deleteOne();
+
+    const userService = Container.get(UserService);
+    const user = await userService.getUserByIdOrThrow(userId);
+
+    const accessToken = signAuthToken(user._id.toString());
+    const newRefreshToken = signRefreshToken(user._id.toString());
+
+    await RefreshTokenModel.create({ userId: user._id.toString(), token: newRefreshToken });
+
+    return { accessToken, refreshToken: newRefreshToken };
   }
 
   /**

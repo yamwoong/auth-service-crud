@@ -1,9 +1,7 @@
-import dotenv from 'dotenv-safe';
-import { envSchema } from './env.schema';
+import dotenv from 'dotenv';
+import { envSchema } from '@config/env.schema';
 
-dotenv.config({
-  allowEmptyValues: true,
-});
+dotenv.config();
 
 const { error, value: envVars } = envSchema.validate(process.env, {
   abortEarly: false,

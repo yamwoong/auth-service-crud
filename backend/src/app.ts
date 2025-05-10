@@ -1,19 +1,23 @@
-// src/app.ts
-
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-import userRoutes from './routes/user.route';
-import authRoutes from './routes/auth.route';
-// import { authMiddleware } from './middlewares/auth.middleware';
-import { errorMiddleware } from './middlewares/error.middleware';
-import { AppError } from './errors/AppError';
+import userRoutes from '@routes/user.route';
+import authRoutes from '@routes/auth.route';
+import dashboardRoutes from '@routes/dashboard.route';
+import { authMiddleware } from '@middlewares/auth.middleware';
+import { errorMiddleware } from '@middlewares/error.middleware';
+import { AppError } from '@errors/AppError';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
 // Parse JSON bodies
 app.use(express.json());
+
+app.use(cookieParser());
 
 // Serve the raw OpenAPI spec for frontend or tooling
 app.use('/swagger.yaml', express.static(path.resolve(__dirname, '../swagger.yaml')));
@@ -32,8 +36,8 @@ app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 
 // Apply authentication middleware for all following routes
-// app.use(authMiddleware);
-// app.use('/dashboard', dashboardRoutes);
+app.use(authMiddleware);
+app.use('/dashboard', dashboardRoutes);
 // app.use('/users/me', profileRoutes);
 
 // Handle 404 for any unmatched route

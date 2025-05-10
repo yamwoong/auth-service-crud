@@ -1,5 +1,5 @@
 import { Container } from 'typedi';
-import { UserService } from '../user.service';
+import { UserService } from '@services/user.service';
 import { createDummyUser } from '@test-utils/createDummyUser';
 import { TEST_USER_EMAIL, TEST_USER_USERNAME } from '@test-utils/test-user';
 import { UserAlreadyExistsError } from '@errors/UserAlreadyExistsError';
