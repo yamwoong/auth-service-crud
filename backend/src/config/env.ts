@@ -20,4 +20,14 @@ export const env = {
   refreshSecret: envVars.JWT_REFRESH_SECRET,
   refreshExpiresIn: envVars.JWT_REFRESH_EXPIRES_IN,
   redisUrl: envVars.REDIS_URL || '',
+
+  googleClientId: envVars.GOOGLE_CLIENT_ID,
+  googleClientSecret: envVars.GOOGLE_CLIENT_SECRET,
+  googleCallbackUrl: envVars.GOOGLE_CALLBACK_URL,
+
+  gmailClientId: envVars.GMAIL_CLIENT_ID,
+  gmailClientSecret: envVars.GMAIL_CLIENT_SECRET,
+  gmailRefreshToken: envVars.GMAIL_REFRESH_TOKEN,
+  gmailUser: envVars.GMAIL_USER,
+  resetPasswordUrl: envVars.RESET_PASSWORD_URL,
 };

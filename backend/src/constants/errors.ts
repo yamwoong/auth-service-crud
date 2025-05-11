@@ -3,8 +3,11 @@ export const AUTH_ERRORS = {
   UNAUTHORIZED: 'Unauthorized access',
   USER_NOT_FOUND: 'User not found',
   INVALID_CURRENT_PASSWORD: 'Current password is incorrect',
+  NO_REFRESH_TOKEN_PROVIDED: 'No refresh token provided',
+  INVALID_REFRESH_TOKEN: 'Invalid or expired refresh token',
 };
 
 export const COMMON_ERRORS = {
   VALIDATION_FAILED: 'Validation failed',
+  INVALID_OR_EXPIRED_TOKEN: 'Invalid or expired token',
 };

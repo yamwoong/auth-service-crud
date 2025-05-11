@@ -38,7 +38,7 @@ describe('UserService – password hashing', () => {
     expect(userRecord!.password).toMatch(/^\$argon2/);
 
     // Verify the hash matches the original password
-    const isMatch = await comparePassword(TEST_USER_PASSWORD, userRecord!.password);
+    const isMatch = await comparePassword(TEST_USER_PASSWORD, userRecord!.password!);
     expect(isMatch).toBe(true);
   });
 });

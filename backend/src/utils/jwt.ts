@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 import { env } from '@config/env';
 
 /**
@@ -6,10 +6,8 @@ import { env } from '@config/env';
  * @param userId MongoDB _id string
  * @returns Signed JWT access token string
  */
-export function signAuthToken(userId: string): string {
-  return jwt.sign({ userId }, env.jwtSecret, {
-    expiresIn: env.jwtExpiresIn,
-  });
+export function signAuthToken(userId: string, expiresIn = env.jwtExpiresIn): string {
+  return jwt.sign({ userId }, env.jwtSecret, { expiresIn });
 }
 
 /**

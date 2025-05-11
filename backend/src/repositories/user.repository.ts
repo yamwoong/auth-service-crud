@@ -4,6 +4,7 @@ import { User } from '../models/user.model';
 import { mapMongoUserToUser } from '../mappers/user.mapper';
 import { UserModel } from '../schemas/user.schema';
 import { MongoUser } from '../models/user-with-password.model';
+import { CreateSocialUserDto } from '@dtos/user/create-social-user.dto';
 
 @Service()
 export class UserRepository {
@@ -23,9 +24,9 @@ export class UserRepository {
    * Converts the raw MongoDB document into a clean domain model.
    */
 
-  async create(data: CreateUserDto): Promise<User> {
+  async create(data: CreateUserDto | CreateSocialUserDto): Promise<MongoUser> {
     const created = await UserModel.create(data);
-    return mapMongoUserToUser(created.toObject());
+    return created.toObject(); // ✅ raw MongoUser 반환
   }
 
   /**

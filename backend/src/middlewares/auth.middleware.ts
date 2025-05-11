@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 import { env } from '@config/env';
 import { AppError } from '@errors/AppError';
 import { AUTH_ERRORS } from '@constants/errors';
@@ -25,23 +25,27 @@ export const authMiddleware = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new AppError(AUTH_ERRORS.UNAUTHORIZED, 401);
     }
+    const token = authHeader.slice(7).trim();
 
-    const token = authHeader.split(' ')[1];
+    let payload: { userId: string };
+    try {
+      payload = jwt.verify(token, env.jwtSecret) as { userId: string };
+    } catch (err) {
+      if (err instanceof JsonWebTokenError) {
+        throw new AppError(AUTH_ERRORS.UNAUTHORIZED, 401);
+      }
+      throw err;
+    }
 
-    const decoded = jwt.verify(token, env.jwtSecret) as { userId: string };
-
-    const userRepository = Container.get(UserRepository);
-    const mongoUser = await userRepository.findById(decoded.userId);
-
+    const repo = Container.get(UserRepository);
+    const mongoUser = await repo.findById(payload.userId);
     if (!mongoUser) {
       throw new AppError(AUTH_ERRORS.UNAUTHORIZED, 401);
     }
 
-    // Bind user safely to the request object
     req.user = mapMongoUserToUser(mongoUser);
 
     next();

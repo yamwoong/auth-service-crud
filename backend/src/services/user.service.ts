@@ -10,6 +10,8 @@ import { AUTH_ERRORS } from '@constants/errors';
 import { AppError } from '@errors/AppError';
 import { MongoUser } from '@models/user-with-password.model';
 import { comparePassword } from '@utils/hash';
+import { CreateSocialUserDto } from '@dtos/user/create-social-user.dto';
+import { mapMongoUserToUser, mapMongoGoogleUserToUser } from '@mappers/user.mapper';
 
 @Service()
 export class UserService {
@@ -30,18 +32,20 @@ export class UserService {
    * @throws UserAlreadyExistsError if either email or username is already in use.
    */
   async createUser(data: CreateUserDto): Promise<User> {
-    // 1. Determine which field conflicts, if any
     const conflict = await this.userRepository.findConflictField(data.email, data.username);
 
     if (conflict) {
-      // 2. If conflict, pick the appropriate identifier and throw
       const identifier = conflict === 'email' ? data.email : data.username;
       throw new UserAlreadyExistsError(identifier);
     }
 
-    // 3. No conflict: hash password and create
     const hashed = await hashPassword(data.password);
-    return this.userRepository.create({ ...data, password: hashed });
+
+    // 1️⃣ raw MongoUser 받기
+    const created = await this.userRepository.create({ ...data, password: hashed });
+
+    // 2️⃣ 매핑 후 반환
+    return mapMongoUserToUser(created);
   }
 
   /**
@@ -61,7 +65,7 @@ export class UserService {
   ): Promise<void> {
     const user = await this.getUserByIdOrThrow(userid);
 
-    const isMatch = await comparePassword(currentPassword, user.password);
+    const isMatch = await comparePassword(currentPassword, user.password!);
 
     if (!isMatch) {
       throw new AppError(AUTH_ERRORS.INVALID_CURRENT_PASSWORD, 401);
@@ -86,5 +90,40 @@ export class UserService {
       throw new AppError(AUTH_ERRORS.USER_NOT_FOUND, 404);
     }
     return user;
+  }
+
+  /**
+   * Find an existing user by Google email, or create a new user if not exists.
+   *
+   * @param email - The user's Google email address
+   * @param name - The user's full name from Google profile
+   * @param googleId - The Google-provided unique ID
+   * @returns The found or newly created user
+   */
+
+  public async findOrCreateGoogleUser(
+    email: string,
+    name: string,
+    googleId: string
+  ): Promise<User> {
+    const existingUser = await this.userRepository.findByEmail(email);
+
+    if (existingUser) {
+      return mapMongoGoogleUserToUser(existingUser); // ✅ 소셜 유저용 매퍼 사용
+    }
+
+    const username = email.split('@')[0];
+
+    const socialUser: CreateSocialUserDto = {
+      email,
+      name,
+      username,
+      provider: 'google',
+      googleId,
+      password: '',
+    };
+
+    const created = await this.userRepository.create(socialUser);
+    return mapMongoGoogleUserToUser(created); // ✅ 동일하게 적용
   }
 }
