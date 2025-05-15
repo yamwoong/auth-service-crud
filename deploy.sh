@@ -3,14 +3,14 @@ set -euo pipefail
 
 # ====== 설정 값 ======
 REPO_DIR=~/auth-service
-REPO_URL=git@github.com:yamwoong/auth-service-crud.git
+# SSH → HTTPS 로 변경
+REPO_URL=https://github.com/yamwoong/auth-service-crud.git
 BRANCH=main
 # ====================
 
 echo ">>> Deploying $REPO_URL ($BRANCH) to $REPO_DIR"
 
 # ——— 0) 필수 툴 설치 확인 & 자동 설치 ———
-#   docker, docker-compose, git
 if ! command -v git &> /dev/null || ! command -v docker &> /dev/null; then
   echo ">>> Required tools missing. Installing…"
   if command -v apt-get &> /dev/null; then
@@ -18,9 +18,7 @@ if ! command -v git &> /dev/null || ! command -v docker &> /dev/null; then
     sudo apt-get install -y git docker.io docker-compose
   elif command -v yum &> /dev/null; then
     sudo yum update -y
-    # git
     sudo yum install -y git
-    # docker
     sudo amazon-linux-extras install -y docker || sudo yum install -y docker
     DOCKER_COMPOSE_VERSION="1.29.2"
     sudo curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" \
@@ -31,7 +29,6 @@ if ! command -v git &> /dev/null || ! command -v docker &> /dev/null; then
     exit 1
   fi
 
-  # Docker 서비스 기동 및 권한 부여
   sudo systemctl enable --now docker
   sudo usermod -aG docker "$USER"
   echo ">>> Installation of git & Docker complete."
