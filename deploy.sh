@@ -9,28 +9,53 @@ BRANCH=main
 
 echo ">>> Deploying $REPO_URL ($BRANCH) to $REPO_DIR"
 
-# 0) 디렉토리 생성 (없으면)
+# ——— 0) Docker / docker-compose 설치 확인 & 자동 설치 ———
+if ! command -v docker &> /dev/null; then
+  echo ">>> Docker not found, installing…"
+  if [ -f /etc/debian_version ]; then
+    # Ubuntu / Debian 계열
+    sudo apt-get update
+    sudo apt-get install -y docker.io docker-compose
+  elif [ -f /etc/redhat-release ]; then
+    # Amazon Linux / CentOS 계열
+    sudo yum update -y
+    sudo amazon-linux-extras install -y docker || sudo yum install -y docker
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" \
+      -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+  else
+    echo "Unsupported OS; please install Docker manually."
+    exit 1
+  fi
+
+  # 서비스 기동 및 권한 부여
+  sudo systemctl enable --now docker
+  sudo usermod -aG docker "$USER"
+  echo ">>> Docker installation complete."
+fi
+
+# ——— 1) 배포 디렉토리 생성 ———
 mkdir -p "$REPO_DIR"
 
-# 1) 클론 또는 업데이트
+# ——— 2) 클론 또는 업데이트 ———
 if [ ! -d "$REPO_DIR/.git" ]; then
-  echo "Cloning repository..."
+  echo "Cloning repository…"
   git clone -b "$BRANCH" "$REPO_URL" "$REPO_DIR"
 else
-  echo "Updating existing repo..."
+  echo "Updating existing repo…"
   cd "$REPO_DIR"
   git fetch origin "$BRANCH"
   git reset --hard "origin/$BRANCH"
 fi
 
-# 2) 디렉터리 이동 (클론/업데이트 후)
+# ——— 3) 워킹 디렉토리로 이동 ———
 cd "$REPO_DIR"
 
-# 3) Docker Compose로 컨테이너 재시작
-echo "Pulling new images..."
+# ——— 4) Docker Compose 재시작 ———
+echo "Pulling new images…"
 docker-compose pull
 
-echo "Starting containers..."
+echo "Starting containers…"
 docker-compose up -d --remove-orphans
 
 echo ">>> Deployment complete!"
