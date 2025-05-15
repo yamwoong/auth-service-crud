@@ -28,6 +28,7 @@ jobs:
 
       # 4. Build and push Docker image
       - name: Build and push Docker image
+        working-directory: backend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }}
@@ -36,4 +37,6 @@ jobs:
       - name: Deploy to EC2 instance via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "cd ~/auth-service
+            "cd ~/auth-service && \
+             docker pull ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }} && \
+             docker-compose up -d"
