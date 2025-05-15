@@ -33,9 +33,9 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }}
 
-      # 5. Deploy to EC2 instance via SSH
-      - name: Deploy to EC2 via deploy.sh
+      # 5. Deploy to EC2 via deploy.sh (경로 수정)
+      - name: Deploy to EC2 instance via SSH
         run: |
           ssh -o StrictHostKeyChecking=no \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'bash -s' \
-            < ./auth-service/deploy.sh
+            < ./deploy.sh
