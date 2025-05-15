@@ -109,7 +109,6 @@ export class AuthService {
 
   public async logout(refreshToken: string): Promise<void> {
     if (!refreshToken) {
-      // 클라이언트가 토큰을 보내지 않았다면 잘못된 요청
       throw new AppError(AUTH_ERRORS.NO_REFRESH_TOKEN_PROVIDED, 400);
     }
 

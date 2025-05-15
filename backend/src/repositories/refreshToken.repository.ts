@@ -4,6 +4,16 @@ import { RefreshTokenModel } from '@schemas/refresh-token.schema';
 @Service()
 export class RefreshTokenRepository {
   /**
+   * Stores a new refresh token for the given user.
+   * @param userId – The ID of the user
+   * @param token – The refresh token string
+   * @usage Called after login (including Google OAuth)
+   */
+  public async saveToken(userId: string, token: string): Promise<void> {
+    await RefreshTokenModel.create({ userId, token });
+  }
+
+  /**
    * Deletes a refresh token by its token string.
    * @param token – the refresh token to delete
    * @returns true if a record was deleted, false otherwise

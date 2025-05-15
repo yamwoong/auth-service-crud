@@ -1,0 +1,31 @@
+services:
+  mongo:
+    image: mongo:6
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: auth-service-backend:latest
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env.development
+
+  frontend:
+    build:
+      context: ./frontend # 이 경로에 방금 만든 Dockerfile이 있습니다
+      dockerfile: Dockerfile
+    image: auth-service-frontend:latest
+    depends_on:
+      - backend # 백엔드가 먼저 올라와야 API 호출 가능
+    ports:
+      - "8080:80" # 호스트 8080 → 컨테이너 80(Nginx)
+
+volumes:
+  mongo-data:

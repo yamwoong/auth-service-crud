@@ -1,0 +1,18 @@
+# ✅ Node
+node_modules
+dist
+npm-debug.log
+
+# ✅ Git
+.git
+.gitignore
+
+# ✅ 환경 파일 (보안)
+.env
+.env.*   # includes .env.production, .env.development
+
+# ✅ Editor & OS
+.vscode
+.DS_Store
+*.swp
+*.log

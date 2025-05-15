@@ -12,6 +12,8 @@ import { getGoogleTokens, getGoogleUserInfo } from '@utils/google';
 import { signAuthToken, signRefreshToken } from '@utils/jwt';
 import { forgotPasswordSchema } from '@dtos/auth/forgot-password.dto';
 import { resetPasswordSchema } from '@dtos/auth/reset-password.dto';
+import { RefreshTokenRepository } from '@repositories/refreshToken.repository';
+
 /**
  * @route   POST /auth/login
  * @desc    Login a user and return JWT token
@@ -83,7 +85,6 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response) =
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
   const refreshToken = getRefreshTokenFromCookie(req);
-
   const authService = Container.get(AuthService);
   await authService.logout(refreshToken);
 
@@ -96,7 +97,6 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({ message: 'Logged out successfully' });
 });
-
 /**
  *
  * @route GET /auth/google
@@ -134,9 +134,13 @@ export const googleAuthCallback = asyncHandler(async (req: Request, res: Respons
   const accessToken = signAuthToken(user.id);
   const refreshToken = signRefreshToken(user.id);
 
+  const refreshTokenRepo = Container.get(RefreshTokenRepository);
+  await refreshTokenRepo.saveToken(user.id, refreshToken);
+
   setRefreshTokenCookie(res, refreshToken);
 
-  res.status(200).json({ token: accessToken, user });
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+  return res.redirect(`${frontendUrl}/oauth-success?token=${accessToken}`);
 });
 
 /**

@@ -1,6 +1,6 @@
 .env
 
-.env.test
+.env.development
 
 coverage/
 

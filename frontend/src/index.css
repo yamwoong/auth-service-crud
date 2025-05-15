@@ -1,0 +1,18 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: sans-serif;
+  background-color: #f3f4f6;
+}
+
+body {
+  display: block; /* Vite 기본 flex 제거 */
+}

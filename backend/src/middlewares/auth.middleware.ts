@@ -33,6 +33,7 @@ export const authMiddleware = async (
     let payload: { userId: string };
     try {
       payload = jwt.verify(token, env.jwtSecret) as { userId: string };
+      console.log('✅ Decoded payload:', payload);
     } catch (err) {
       if (err instanceof JsonWebTokenError) {
         throw new AppError(AUTH_ERRORS.UNAUTHORIZED, 401);

@@ -47,7 +47,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-
     post:
       summary: Register a new user
       tags:
@@ -67,6 +66,57 @@ paths:
                 $ref: '#/components/schemas/User'
         '409':
           description: Conflict — email or username already exists
+
+  # ──────────────────────────────────────────────
+  # Retrieve single user by ID
+  # ──────────────────────────────────────────────
+  /users/{id}:
+    get:
+      summary: Retrieve a single user by ID
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Unique identifier of the user
+      responses:
+        '200':
+          description: User object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+  # ──────────────────────────────────────────────
+  # Update authenticated user's password
+  # ──────────────────────────────────────────────
+  /users/me/password:
+    patch:
+      summary: Update the authenticated user's password
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordDto'
+      responses:
+        '200':
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Bad Request — invalid input
+        '401':
+          description: Unauthorized — authentication required
 
   # ──────────────────────────────────────────────
   # Authentication Endpoints
@@ -94,14 +144,129 @@ paths:
         '400':
           description: Bad Request — missing required fields
 
+  /auth/refresh:
+    post:
+      summary: Refresh access token using refresh token
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: Unauthorized — invalid or missing refresh token
+
+  /auth/logout:
+    post:
+      summary: Log out the user and clear refresh token
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '401':
+          description: Unauthorized — authentication required
+
+  /auth/google:
+    get:
+      summary: Redirect to Google OAuth2 login
+      tags:
+        - Auth
+      responses:
+        '302':
+          description: Redirect to Google OAuth2 authentication URL
+
+  /auth/google/callback:
+    get:
+      summary: Handle Google OAuth2 callback
+      tags:
+        - Auth
+      parameters:
+        - in: query
+          name: code
+          required: false
+          schema:
+            type: string
+          description: Authorization code returned by Google
+      responses:
+        '200':
+          description: Login via Google successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Bad Request — authorization code not provided
+
+  /auth/forgot-password:
+    post:
+      summary: Send password reset email
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordDto'
+      responses:
+        '200':
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Bad Request — missing or invalid fields
+
+  /auth/reset-password:
+    post:
+      summary: Reset user's password using token
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordDto'
+      responses:
+        '200':
+          description: Password has been reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Bad Request — invalid token or fields
+
+  # ──────────────────────────────────────────────
+  # Dashboard Endpoint
+  # ──────────────────────────────────────────────
+  /dashboard:
+    get:
+      summary: Retrieve authenticated user's dashboard
+      tags:
+        - Dashboard
+      responses:
+        '200':
+          description: Dashboard data returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+        '401':
+          description: Unauthorized — authentication required
+
 components:
-  # ──────────────────────────────────────────────
-  # Schema Definitions
-  # ──────────────────────────────────────────────
   schemas:
-    # ──────────────────────────────────────────────
-    # DTO for creating a new user
-    # ──────────────────────────────────────────────
     CreateUserDto:
       type: object
       required:
@@ -123,9 +288,6 @@ components:
           type: string
           writeOnly: true
 
-    # ──────────────────────────────────────────────
-    # User model representation
-    # ──────────────────────────────────────────────
     User:
       type: object
       properties:
@@ -145,30 +307,110 @@ components:
         email: 'default@example.com'
         name: 'Default Name'
 
-    # ──────────────────────────────────────────────
-    # DTO for user login credentials
-    # ──────────────────────────────────────────────
+    CreateSocialUserDto:
+      type: object
+      required:
+        - email
+        - name
+        - username
+        - provider
+        - googleId
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        username:
+          type: string
+        provider:
+          type: string
+          enum: ['google']
+        googleId:
+          type: string
+        password:
+          type: string
+          enum: ['']
+
     LoginDto:
       type: object
       required:
-        - identifier
         - password
       properties:
-        identifier:
+        email:
           type: string
-          description: Email or username for login
+          format: email
+          description: Optional email to login
+        username:
+          type: string
+          description: Optional username to login
         password:
           type: string
           writeOnly: true
+          description: User password
 
-    # ──────────────────────────────────────────────
-    # Response schema after successful login
-    # ──────────────────────────────────────────────
     LoginResponse:
       type: object
       properties:
         token:
           type: string
           description: JWT access token
+        user:
+          $ref: '#/components/schemas/User'
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: New JWT access token
+
+    ForgotPasswordDto:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+          description: Username or email to send reset link
+
+    ResetPasswordDto:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          description: Password reset JWT token
+        newPassword:
+          type: string
+          description: New password for the user
+
+    UpdatePasswordDto:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          description: Current user password
+        newPassword:
+          type: string
+          description: New password to set
+
+    ResponseMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Informational message
+
+    DashboardResponse:
+      type: object
+      properties:
+        message:
+          type: string
         user:
           $ref: '#/components/schemas/User'

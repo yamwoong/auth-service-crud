@@ -5,6 +5,7 @@ import { mapMongoUserToUser } from '../mappers/user.mapper';
 import { UserModel } from '../schemas/user.schema';
 import { MongoUser } from '../models/user-with-password.model';
 import { CreateSocialUserDto } from '@dtos/user/create-social-user.dto';
+import { Types } from 'mongoose';
 
 @Service()
 export class UserRepository {
@@ -53,7 +54,8 @@ export class UserRepository {
    */
 
   async findById(id: string): Promise<MongoUser | null> {
-    return await UserModel.findById(id).select('+password');
+    if (!Types.ObjectId.isValid(id)) return null;
+    return await UserModel.findById(new Types.ObjectId(id)).select('+password');
   }
 
   /**
