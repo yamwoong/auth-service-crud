@@ -8,8 +8,13 @@ COPY package*.json tsconfig.json ./
 # 2) Install dependencies
 RUN npm install
 
-# 3) Copy source and build
+# 3) Copy source
 COPY . .
+
+# 3.5) 빌드 시 메모리 한계(힙)를 4GB로 늘려 OOM 방지
+ENV NODE_OPTIONS="--max_old_space_size=4096"
+
+# 4) Build
 RUN npm run build
 
 # --- Final stage ---
@@ -30,5 +35,5 @@ RUN mv dist/src/* dist/ && rm -rf dist/src
 # 3) Production mode
 ENV NODE_ENV=production
 
-# 4) Use module-alias for runtime alias resolution
+# 4) Run
 CMD ["node", "-r", "module-alias/register", "dist/server.js"]
