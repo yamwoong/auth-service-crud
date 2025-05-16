@@ -7,29 +7,26 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
-    # 1) CI 전체에서 사용할 이미지 태그
     env:
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
-      # 2) 코드 체크아웃
+      # 1) Checkout
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 3) SSH 키 로드
+      # 2) SSH key for deploy.sh
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 4) Docker Hub 로그인
+      # 3) Docker Hub login
       - name: Log in to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" |
-            docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" \
+          | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      # 5) Backend 이미지 빌드 & 푸시
+      # 4) Build & push backend
       - name: Build and push backend image
         working-directory: backend
         run: |
@@ -39,7 +36,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest
 
-      # 6) Frontend 이미지 빌드 & 푸시
+      # 5) Build & push frontend
       - name: Build and push frontend image
         working-directory: frontend
         run: |
@@ -49,21 +46,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest
 
-      # 7) 원격 서버에 .env.development 생성 (기존)
-      - name: Create .env.development on server
-        run: |
-          ssh -o StrictHostKeyChecking=no \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          mkdir -p ~/auth-service/backend
-          cat > ~/auth-service/backend/.env.development << 'EOL'
-          NODE_ENV=${{ secrets.NODE_ENV }}
-          PORT=${{ secrets.PORT }}
-          MONGODB_URI=${{ secrets.MONGODB_URI }}
-          # … 이하 생략 …
-          EOL
-          EOF
-
-      # 8) deploy.sh 실행 (기존)
+      # 6) Deploy via deploy.sh
       - name: Deploy to EC2 via deploy.sh
         run: |
           ssh -o StrictHostKeyChecking=no \

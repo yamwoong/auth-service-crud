@@ -8,22 +8,22 @@ services:
       - mongo-data:/data/db
 
   backend:
-    # CI에서 빌드된 이미지를 pull 해 사용
-    image: YOUR_DOCKER_USERNAME/auth-service-backend:${IMAGE_TAG}
-    depends_on:
-      - mongo
+    image: <YOUR_DOCKER_USERNAME>/auth-service-backend:latest
+    restart: always
     ports:
       - "3000:3000"
     env_file:
       - ./backend/.env.development
+    depends_on:
+      - mongo
 
   frontend:
-    # CI에서 빌드된 이미지를 pull 해 사용
-    image: YOUR_DOCKER_USERNAME/auth-service-frontend:${IMAGE_TAG}
-    depends_on:
-      - backend
+    image: <YOUR_DOCKER_USERNAME>/auth-service-frontend:latest
+    restart: always
     ports:
       - "8080:80"
+    depends_on:
+      - backend
 
 volumes:
   mongo-data:
