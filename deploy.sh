@@ -25,7 +25,7 @@ if ! command -v git &> /dev/null || ! command -v docker &> /dev/null; then
     # Docker 설치
     sudo amazon-linux-extras install -y docker || sudo yum install -y docker
 
-    # docker-compose(파이썬 번들)에서 libcrypt.so.1을 찾지 못하는 문제 해결용 패키지
+    # libcrypt.so.1 문제 해결용 패키지
     sudo yum install -y libxcrypt-compat
 
     # docker-compose 바이너리 설치
@@ -46,4 +46,28 @@ if ! command -v git &> /dev/null || ! command -v docker &> /dev/null; then
   echo ">>> Installation of git & Docker complete."
 fi
 
-# 이하 기존 로직...
+# ——— 1) 배포 디렉터리 생성 ———
+mkdir -p "$REPO_DIR"
+
+# ——— 2) 클론 또는 업데이트 ———
+if [ ! -d "$REPO_DIR/.git" ]; then
+  echo "Cloning repository…"
+  git clone -b "$BRANCH" "$REPO_URL" "$REPO_DIR"
+else
+  echo "Updating existing repo…"
+  cd "$REPO_DIR"
+  git fetch origin "$BRANCH"
+  git reset --hard "origin/$BRANCH"
+fi
+
+# ——— 3) 워킹 디렉터리로 이동 ———
+cd "$REPO_DIR"
+
+# ——— 4) Docker Compose로 컨테이너 재시작 ———
+echo "Pulling new images…"
+docker-compose pull
+
+echo "Starting containers…"
+docker-compose up -d --remove-orphans
+
+echo ">>> Deployment complete!"
