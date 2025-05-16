@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   mongo:
     image: mongo:6
@@ -6,10 +8,8 @@ services:
       - mongo-data:/data/db
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    image: auth-service-backend:latest
+    # CI에서 빌드된 이미지를 pull 해 사용
+    image: YOUR_DOCKER_USERNAME/auth-service-backend:${IMAGE_TAG}
     depends_on:
       - mongo
     ports:
@@ -18,14 +18,12 @@ services:
       - ./backend/.env.development
 
   frontend:
-    build:
-      context: ./frontend # 이 경로에 방금 만든 Dockerfile이 있습니다
-      dockerfile: Dockerfile
-    image: auth-service-frontend:latest
+    # CI에서 빌드된 이미지를 pull 해 사용
+    image: YOUR_DOCKER_USERNAME/auth-service-frontend:${IMAGE_TAG}
     depends_on:
-      - backend # 백엔드가 먼저 올라와야 API 호출 가능
+      - backend
     ports:
-      - "8080:80" # 호스트 8080 → 컨테이너 80(Nginx)
+      - "8080:80"
 
 volumes:
   mongo-data:

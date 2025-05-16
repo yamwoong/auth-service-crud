@@ -2,38 +2,54 @@ name: CI/CD Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    # 1) CI 전체에서 사용할 이미지 태그
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+
     steps:
-      # 1. Checkout repository code
+      # 2) 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Load SSH key into ssh-agent
+      # 3) SSH 키 로드
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 3. Log in to Docker Hub
+      # 4) Docker Hub 로그인
       - name: Log in to Docker Hub
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" \
-            | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.DOCKER_PASSWORD }}" |
+            docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      # 4. Build and push Docker image
-      - name: Build and push Docker image
+      # 5) Backend 이미지 빌드 & 푸시
+      - name: Build and push backend image
         working-directory: backend
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }} .
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }}
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest
 
-      # 5-1. 서버에 .env.development 파일 생성
+      # 6) Frontend 이미지 빌드 & 푸시
+      - name: Build and push frontend image
+        working-directory: frontend
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest
+
+      # 7) 원격 서버에 .env.development 생성 (기존)
       - name: Create .env.development on server
         run: |
           ssh -o StrictHostKeyChecking=no \
@@ -43,25 +59,12 @@ jobs:
           NODE_ENV=${{ secrets.NODE_ENV }}
           PORT=${{ secrets.PORT }}
           MONGODB_URI=${{ secrets.MONGODB_URI }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
-          JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-          JWT_REFRESH_EXPIRES_IN=${{ secrets.JWT_REFRESH_EXPIRES_IN }}
-          REDIS_URL=${{ secrets.REDIS_URL }}
-          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
-          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
-          GMAIL_CLIENT_ID=${{ secrets.GMAIL_CLIENT_ID }}
-          GMAIL_CLIENT_SECRET=${{ secrets.GMAIL_CLIENT_SECRET }}
-          GMAIL_REFRESH_TOKEN=${{ secrets.GMAIL_REFRESH_TOKEN }}
-          GMAIL_USER=${{ secrets.GMAIL_USER }}
-          RESET_PASSWORD_URL=${{ secrets.RESET_PASSWORD_URL }}
+          # … 이하 생략 …
           EOL
           EOF
 
-      # 5-2. Deploy to EC2 via deploy.sh
-      - name: Deploy to EC2 instance via SSH
+      # 8) deploy.sh 실행 (기존)
+      - name: Deploy to EC2 via deploy.sh
         run: |
           ssh -o StrictHostKeyChecking=no \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'bash -s' \
