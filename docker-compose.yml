@@ -8,7 +8,7 @@ services:
       - mongo-data:/data/db
 
   backend:
-    image: <YOUR_DOCKER_USERNAME>/auth-service-backend:latest
+    image: "${DOCKER_USERNAME}/auth-service-backend:${IMAGE_TAG}"
     restart: always
     ports:
       - "3000:3000"
@@ -18,7 +18,7 @@ services:
       - mongo
 
   frontend:
-    image: <YOUR_DOCKER_USERNAME>/auth-service-frontend:latest
+    image: "${DOCKER_USERNAME}/auth-service-frontend:${IMAGE_TAG}"
     restart: always
     ports:
       - "8080:80"
