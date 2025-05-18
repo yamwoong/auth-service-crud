@@ -32,20 +32,20 @@ jobs:
         working-directory: backend
         run: |
           docker build \
-            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }} \
-            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest
+            -t "${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }}" \
+            -t "${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest" .
+          docker push "${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }}"
+          docker push "${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest"
 
       # 5) Build & push frontend image
       - name: Build and push frontend image
         working-directory: frontend
         run: |
           docker build \
-            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }} \
-            -t ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest
+            -t "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}" \
+            -t "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest" .
+          docker push "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}"
+          docker push "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest"
 
       # 6) Add EC2 host to known_hosts
       - name: Add EC2 to known_hosts
