@@ -70,11 +70,29 @@ jobs:
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             exit
 
-      # 8) Deploy to EC2 via deploy.sh (pass IMAGE_TAG & DOCKER_USERNAME)
+      # 8) Deploy to EC2 via deploy.sh (with development env)
       - name: Deploy to EC2 via deploy.sh
         run: |
-          ssh \
-            -o StrictHostKeyChecking=no \
-            -o ConnectTimeout=10 \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "export IMAGE_TAG=${{ env.IMAGE_TAG }} DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} && bash -s" < ./deploy.sh
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          export IMAGE_TAG=${{ env.IMAGE_TAG }}
+          export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+          export NODE_ENV=${{ secrets.NODE_ENV }}
+          export PORT=${{ secrets.PORT }}
+          export MONGODB_URI=${{ secrets.MONGODB_URI }}
+          export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          export JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+          export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+          export JWT_REFRESH_EXPIRES_IN=${{ secrets.JWT_REFRESH_EXPIRES_IN }}
+          export REDIS_URL=${{ secrets.REDIS_URL }}
+          export GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          export GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          export GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+          export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          export GMAIL_CLIENT_ID=${{ secrets.GMAIL_CLIENT_ID }}
+          export GMAIL_CLIENT_SECRET=${{ secrets.GMAIL_CLIENT_SECRET }}
+          export GMAIL_REFRESH_TOKEN=${{ secrets.GMAIL_REFRESH_TOKEN }}
+          export GMAIL_USER=${{ secrets.GMAIL_USER }}
+          export RESET_PASSWORD_URL=${{ secrets.RESET_PASSWORD_URL }}
+          bash -s < ./deploy.sh
+          EOF
