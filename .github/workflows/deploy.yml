@@ -27,10 +27,17 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" |
             docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
+      # Debug: Docker variables
+      - name: Debug Docker variables
+        run: |
+          echo "DOCKER_USERNAME='${{ secrets.DOCKER_USERNAME }}'"
+          echo "IMAGE_TAG='${{ env.IMAGE_TAG }}'"
+
       # 4) Build & push backend image
       - name: Build and push backend image
         working-directory: backend
         run: |
+          echo "Building backend image: \"${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }}\""
           docker build \
             -t "${{ secrets.DOCKER_USERNAME }}/auth-service-backend:${{ env.IMAGE_TAG }}" \
             -t "${{ secrets.DOCKER_USERNAME }}/auth-service-backend:latest" .
@@ -41,6 +48,7 @@ jobs:
       - name: Build and push frontend image
         working-directory: frontend
         run: |
+          echo "Building frontend image: \"${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}\""
           docker build \
             -t "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}" \
             -t "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest" .
