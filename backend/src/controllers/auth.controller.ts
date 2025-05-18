@@ -140,7 +140,7 @@ export const googleAuthCallback = asyncHandler(async (req: Request, res: Respons
   setRefreshTokenCookie(res, refreshToken);
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
-  return res.redirect(`${frontendUrl}/oauth-success?token=${accessToken}`);
+  return res.redirect(`${frontendUrl}/dashboard?token=${accessToken}`);
 });
 
 /**

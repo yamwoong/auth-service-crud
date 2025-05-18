@@ -1,19 +1,19 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function OAuthSuccessPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const token = searchParams.get("token");
 
   useEffect(() => {
     if (token) {
       localStorage.setItem("token", token);
-      navigate("/dashboard");
+
+      window.location.href = `${window.location.origin}/dashboard`;
     } else {
-      navigate("/login");
+      window.location.href = `${window.location.origin}/login`;
     }
-  }, [token, navigate]);
+  }, [token]);
 
   return <p>Logging you in with Google...</p>;
 }

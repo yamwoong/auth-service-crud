@@ -53,7 +53,8 @@ export default function LoginForm() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/auth/google";
+    const apiBase = import.meta.env.VITE_API_BASE_URL;
+    window.location.href = `${apiBase}/auth/google`;
   };
 
   return (
