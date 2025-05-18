@@ -47,9 +47,26 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest
 
-      # 6) Deploy to EC2 via deploy.sh
+      # 6) Add EC2 host to known_hosts
+      - name: Add EC2 to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      # 7) SSH connection test (fast-fail)
+      - name: SSH 접속 테스트
+        run: |
+          ssh -vvv \
+            -o ConnectTimeout=5 \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            exit
+
+      # 8) Deploy to EC2 via deploy.sh
       - name: Deploy to EC2 via deploy.sh
         run: |
-          ssh -o StrictHostKeyChecking=no \
+          ssh \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=10 \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             'bash -s' < ./deploy.sh
