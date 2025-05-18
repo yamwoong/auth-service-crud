@@ -62,11 +62,11 @@ jobs:
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             exit
 
-      # 8) Deploy to EC2 via deploy.sh
+      # 8) Deploy to EC2 via deploy.sh (pass IMAGE_TAG)
       - name: Deploy to EC2 via deploy.sh
         run: |
           ssh \
             -o StrictHostKeyChecking=no \
             -o ConnectTimeout=10 \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            'bash -s' < ./deploy.sh
+            "export IMAGE_TAG=${{ env.IMAGE_TAG }} && bash -s" < ./deploy.sh
