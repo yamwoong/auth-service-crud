@@ -2,8 +2,6 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# 0) Copy production environment (so Vite can pick up import.meta.env.*)
-COPY .env.production ./
 
 # 1) Copy package metadata & install deps
 COPY package*.json ./
