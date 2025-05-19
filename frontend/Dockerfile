@@ -2,20 +2,27 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# 0) Copy production environment (so Vite can pick up import.meta.env.*)
+COPY .env.production ./
+
+# 1) Copy package metadata & install deps
 COPY package*.json ./
 RUN npm install
 
-
+# 2) Copy source & build
 COPY . .
 RUN npm run build
 
 # --- Production stage ---
 FROM nginx:alpine
-# 1) 기본 conf 제거
+
+# 1) Remove default Nginx config
 RUN rm /etc/nginx/conf.d/default.conf
-# 2) 커스텀 conf 복사
+
+# 2) Copy custom Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-# 3) 빌드 결과물을 Nginx doc root에 복사
+
+# 3) Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
