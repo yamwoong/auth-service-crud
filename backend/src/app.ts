@@ -15,12 +15,15 @@ import cors from 'cors';
 
 const app = express();
 
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:8080'];
+
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173', // Vite 개발 서버
-      'http://localhost:8080', // Docker Nginx 프론트
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
