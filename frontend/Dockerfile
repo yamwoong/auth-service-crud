@@ -2,14 +2,19 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# 0) Copy production env file so Vite can pick up import.meta.env.*
-COPY .env.production .env
+# 1) Declare build args for environment variables
+ARG VITE_API_BASE_URL
+ARG VITE_FRONTEND_URL
 
-# 1) Copy package metadata & install deps
+# 2) Set as ENV for Vite to inline at build time
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_FRONTEND_URL=$VITE_FRONTEND_URL
+
+# 3) Install dependencies
 COPY package*.json ./
 RUN npm install
 
-# 2) Copy source & build
+# 4) Copy source & build
 COPY . .
 RUN npm run build
 

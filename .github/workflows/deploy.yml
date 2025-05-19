@@ -50,6 +50,8 @@ jobs:
         run: |
           echo "Building frontend image: \"${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}\""
           docker build \
+            --build-arg VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }} \
+            --build-arg VITE_FRONTEND_URL=${{ secrets.FRONTEND_URL }} \
             -t "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}" \
             -t "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:latest" .
           docker push "${{ secrets.DOCKER_USERNAME }}/auth-service-frontend:${{ env.IMAGE_TAG }}"
@@ -62,7 +64,7 @@ jobs:
           ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
       # 7) SSH connection test (fast-fail)
-      - name: SSH 접속 테스트
+      - name: SSH connection test
         run: |
           ssh -vvv \
             -o ConnectTimeout=5 \
