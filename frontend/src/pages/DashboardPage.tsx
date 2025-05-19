@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { DashboardService } from "../api/generated/services/DashboardService";
 import { AuthService } from "../api/generated/services/AuthService";
 import type { User } from "../api/generated/models/User";
@@ -10,18 +10,17 @@ const ACCESS_TOKEN_KEY = "token";
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
+  const { search } = useLocation();
 
   // 로그아웃 처리 함수
   const handleLogout = async () => {
     try {
       // 1. 서버에 로그아웃 요청 (refreshToken DB 제거 + 쿠키 삭제)
-      await AuthService.postAuthLogout(); // POST /auth/logout
-
+      await AuthService.postAuthLogout();
       // 2. 클라이언트 측 accessToken 삭제
       localStorage.removeItem(ACCESS_TOKEN_KEY);
-
       // 3. 로그인 페이지로 리디렉션
-      navigate("/login");
+      navigate("/login", { replace: true });
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -34,22 +33,29 @@ export default function DashboardPage() {
 
   // 대시보드 데이터 가져오는 useEffect
   useEffect(() => {
-    console.log("DashboardPage rendered");
+    // 1) URL ?token=… 쿼리 파라미터 읽기
+    const params = new URLSearchParams(search);
+    const tokenFromUrl = params.get("token");
+    if (tokenFromUrl) {
+      // 2) localStorage에 저장
+      localStorage.setItem(ACCESS_TOKEN_KEY, tokenFromUrl);
+      // 3) URL에서 파라미터 제거하고 대시보드로 리다이렉트
+      navigate("/dashboard", { replace: true });
+      return;
+    }
 
+    // 4) 저장된 토큰 확인
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    // 5) 사용자 데이터 호출
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-
-        // 토큰이 없으면 로그인 페이지로 리디렉션
-        if (!token) {
-          navigate("/login");
-          return;
-        }
-
         console.log("Fetching dashboard data...");
         const res = await DashboardService.getDashboard();
-        console.log("Dashboard response:", res);
-
         if (res.user) {
           setUser(res.user);
         } else {
@@ -57,14 +63,16 @@ export default function DashboardPage() {
         }
       } catch (err) {
         console.error("Failed to load dashboard:", err);
-        navigate("/login"); // API 호출 실패 시 로그인 페이지로 리디렉션
+        navigate("/login", { replace: true });
       }
     };
 
     fetchUser();
-  }, [navigate]);
+  }, [navigate, search]);
 
-  if (!user) return <p>Loading dashboard...</p>;
+  if (!user) {
+    return <p>Loading dashboard...</p>;
+  }
 
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
