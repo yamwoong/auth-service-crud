@@ -37,9 +37,7 @@ export default function LoginForm() {
       });
 
       const { token } = response.data;
-      console.log("Token stored:", token);
       localStorage.setItem("token", token);
-      console.log("Navigating to dashboard...");
       navigate("/dashboard");
     } catch (err) {
       if (isAxiosError(err)) {
