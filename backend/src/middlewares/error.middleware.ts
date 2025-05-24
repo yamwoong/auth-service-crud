@@ -13,6 +13,10 @@ export const errorMiddleware = (
   res: Response,
   _next: NextFunction
 ): void => {
+  if (res.headersSent) {
+    return;
+  }
+
   if (err instanceof ValidationError) {
     res.status(400).json({
       status: 'error',

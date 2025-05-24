@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+import 'reflect-metadata';
 import express from 'express';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
@@ -12,6 +13,11 @@ import { errorMiddleware } from '@middlewares/error.middleware';
 import { AppError } from '@errors/AppError';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { useExpressServer, useContainer } from 'routing-controllers';
+import { Container } from 'typedi';
+import { PostController } from '@controllers/PostController';
+
+useContainer(Container);
 
 const app = express();
 
@@ -29,7 +35,7 @@ app.use(
 );
 
 // Parse JSON bodies
-app.use(express.json());
+// app.use(express.json());
 
 app.use(cookieParser());
 
@@ -52,13 +58,18 @@ app.get('/ping', (_req, res) => {
 });
 
 // Public user routes (no authentication)
-app.use('/users', userRoutes);
-app.use('/auth', authRoutes);
+app.use('/users', express.json(), userRoutes);
+app.use('/auth', express.json(), authRoutes);
+
+useExpressServer(app, {
+  controllers: [PostController],
+  routePrefix: '/api',
+  defaultErrorHandler: false,
+});
 
 // Apply authentication middleware for all following routes
 app.use(authMiddleware);
-app.use('/dashboard', dashboardRoutes);
-// app.use('/users/me', profileRoutes);
+app.use('/dashboard', express.json(), dashboardRoutes);
 
 // Handle 404 for any unmatched route
 app.use((_req, _res, next) => {

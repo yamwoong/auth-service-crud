@@ -1,96 +1,65 @@
-import { Container } from 'typedi';
-import { UserService } from '@services/user.service';
-import { createDummyUser } from '@test-utils/createDummyUser';
-import { User } from '@models/user.model';
-import {
-  TEST_USER_EMAIL,
-  TEST_USER_NAME,
-  TEST_USER_PASSWORD,
-  TEST_USER_USERNAME,
-} from '@test-utils/test-user';
+// tests/__tests__/posts.e2e.test.ts
 import request from 'supertest';
+import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import app from '../../app';
+import { createDummyPost, createDummyUpdatePost } from '../../utils/test/createDummyPost';
+import { TEST_POST, TEST_UPDATE_POST } from '../../utils/test/test-post';
 
-describe('UserService - createUser (success)', () => {
-  let userService: UserService;
+describe('Posts API CRUD (In-Memory DB)', () => {
+  let mongod: MongoMemoryServer;
+  let postId: string;
 
-  // Inject a fresh instance before each test
-  beforeEach(() => {
-    userService = Container.get(UserService);
+  beforeAll(async () => {
+    mongod = await MongoMemoryServer.create();
+    await mongoose.connect(mongod.getUri(), { dbName: 'jest' });
   });
 
-  /**
-   * @route   POST /users
-   * @desc    Should create a user and return safe user data
-   * @access  Public
-   */
-  it('should create a user and return safe user data', async () => {
-    // Arrange: create a dummy user DTO with test email
-    const dto = createDummyUser({ email: TEST_USER_EMAIL });
-
-    // Act: attempt to create the user via the service
-    const user: User = await userService.createUser(dto);
-
-    // Assert 1: returned user should match input data (excluding password)
-    expect(user).toMatchObject({
-      username: TEST_USER_USERNAME,
-      email: TEST_USER_EMAIL,
-      name: TEST_USER_NAME,
-    });
-
-    // Assert 2: should have an 'id' field (converted from _id by the mapper)
-    expect(user).toHaveProperty('id');
-
-    // Assert 3: should NOT include 'password' in the final response model
-    expect('password' in user).toBe(false);
-  });
-});
-
-describe('UserService - createUser (validation fails)', () => {
-  /**
-   * @route   POST /users
-   * @desc    Should return 400 if username is missing
-   * @access  Public
-   */
-  it('should return 400 when username is missing', async () => {
-    const res = await request(app).post('/users').send({
-      email: 'test@example.com',
-      name: 'Test Name',
-      password: 'secret123',
-    });
-
-    expect(res.status).toBe(400);
+  afterEach(async () => {
+    for (const col of Object.values(mongoose.connection.collections)) {
+      await col.deleteMany({});
+    }
   });
 
-  /**
-   * @route   POST /users
-   * @desc    Should return 400 if email is invalid
-   * @access  Public
-   */
-  it('should return 400 when email is invalid', async () => {
-    const res = await request(app).post('/users').send({
-      username: 'tester',
-      email: 'not-an-email',
-      name: 'Test Name',
-      password: 'secret123',
-    });
-
-    expect(res.status).toBe(400);
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongod.stop();
   });
 
-  /**
-   * @route   POST /users
-   * @desc    Should return 400 if password is too short
-   * @access  Public
-   */
-  it('should return 400 when password is too short', async () => {
-    const res = await request(app).post('/users').send({
-      username: 'tester',
-      email: 'test@example.com',
-      name: 'Test Name',
-      password: '123',
-    });
+  it('POST /api/posts → 201 Created', async () => {
+    // dynamic dummy
+    const dto = createDummyPost();
+    const res = await request(app).post('/api/posts').send(dto).expect(201);
 
-    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({
+      title: dto.title,
+      content: dto.content,
+      authorId: dto.authorId,
+    });
+    postId = res.body.id;
+  });
+
+  it('GET /api/posts → 200 OK & array', async () => {
+    const res = await request(app).get('/api/posts').expect(200);
+
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('GET /api/posts/:id → 200 OK', async () => {
+    await request(app).get(`/api/posts/${postId}`).expect(200);
+  });
+
+  it('PATCH /api/posts/:id → 200 OK', async () => {
+    // fixed update DTO
+    const updateDto = TEST_UPDATE_POST;
+    const res = await request(app).patch(`/api/posts/${postId}`).send(updateDto).expect(200);
+
+    expect(res.body.title).toBe(updateDto.title);
+    expect(res.body.content).toBe(updateDto.content);
+  });
+
+  it('DELETE /api/posts/:id → 204 No Content', async () => {
+    await request(app).delete(`/api/posts/${postId}`).expect(204);
   });
 });
