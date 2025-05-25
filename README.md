@@ -8,8 +8,6 @@ It showcases my ability to build secure and scalable backend systems by implemen
 - Password recovery via Gmail  
 - Automated CI/CD deployment to AWS EC2
 
----
-
 ## 🚀 Key Features
 
 - **JWT-based Authentication**  
