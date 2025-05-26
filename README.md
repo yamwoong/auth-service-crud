@@ -157,4 +157,4 @@ backend/
 └── tsconfig.json             # TypeScript compiler configuration
 ```
 
-> ✅ Test files are grouped under `tests/__tests__`, and all source modules follow a clear layered structure (Controller → Service → Repository) for scalability and maintainability.
+> Test files are grouped under `tests/__tests__`, and all source modules follow a clear layered structure (Controller → Service → Repository) for scalability and maintainability.
