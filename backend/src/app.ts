@@ -58,8 +58,8 @@ app.get('/ping', (_req, res) => {
 });
 
 // Public user routes (no authentication)
-app.use('/users', express.json(), userRoutes);
-app.use('/auth', express.json(), authRoutes);
+app.use('/api/users', express.json(), userRoutes);
+app.use('/api/auth', express.json(), authRoutes);
 
 useExpressServer(app, {
   controllers: [PostController],
@@ -69,7 +69,7 @@ useExpressServer(app, {
 
 // Apply authentication middleware for all following routes
 app.use(authMiddleware);
-app.use('/dashboard', express.json(), dashboardRoutes);
+app.use('/api/dashboard', express.json(), dashboardRoutes);
 
 // Handle 404 for any unmatched route
 app.use((_req, _res, next) => {

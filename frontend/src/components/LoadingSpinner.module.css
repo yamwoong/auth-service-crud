@@ -1,0 +1,19 @@
+.spinnerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+}
+.spinner {
+  border: 5px solid #dbeafe;
+  border-top: 5px solid #2563eb;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}

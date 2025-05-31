@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../components/LoginForm.module.css";
 import { api } from "../lib/api";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 
 function isAxiosError(error: unknown): error is {
   isAxiosError: true;
@@ -31,13 +33,25 @@ export default function LoginForm() {
     const isEmail = input.includes("@");
 
     try {
-      const response = await api.post<{ token: string }>("/auth/login", {
+      const response = await api.post<{
+        token: string;
+        user: { id?: string; _id?: string };
+      }>("/auth/login", {
         ...(isEmail ? { email: input } : { username: input }),
         password,
       });
 
-      const { token } = response.data;
+      const { token, user } = response.data;
       localStorage.setItem("token", token);
+
+      if (user?.id) {
+        localStorage.setItem("userId", user.id);
+      } else if (user?._id) {
+        localStorage.setItem("userId", user._id);
+      } else {
+        console.warn("No user id found in login response:", user);
+      }
+
       navigate("/dashboard");
     } catch (err) {
       if (isAxiosError(err)) {
@@ -73,9 +87,8 @@ export default function LoginForm() {
 
         <div className={styles.inputGroup}>
           <label className={styles.label}>Email or Username</label>
-          <input
+          <Input
             type="text"
-            className={styles.input}
             placeholder="email or username"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -85,9 +98,8 @@ export default function LoginForm() {
 
         <div className={styles.inputGroup}>
           <label className={styles.label}>Password</label>
-          <input
+          <Input
             type="password"
-            className={styles.input}
             placeholder="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -95,24 +107,20 @@ export default function LoginForm() {
           />
         </div>
 
-        <button type="submit" className={styles.button}>
+        <Button type="submit" variant="primary">
           Sign In
-        </button>
+        </Button>
 
         <div className={styles.divider}></div>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className={styles.googleButton}
-        >
+        <Button type="button" variant="google" onClick={handleGoogleLogin}>
           <img
             className={styles.googleIcon}
             src="https://www.svgrepo.com/show/475656/google-color.svg"
             alt="Google"
           />
           Continue with Google
-        </button>
+        </Button>
 
         <div className={styles.footer}>
           <p>

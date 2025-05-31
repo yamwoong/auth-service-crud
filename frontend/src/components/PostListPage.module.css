@@ -1,0 +1,70 @@
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.09);
+  padding: 2.5rem 2rem;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.7rem;
+}
+
+.heading {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.createBtn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.17s;
+}
+.createBtn:hover {
+  background: #1744a7;
+}
+
+.postList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.cardWrap {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.deleteBtn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.48rem 1.2rem;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-left: 16px;
+  transition: background 0.16s;
+}
+.deleteBtn:hover {
+  background: #b91c1c;
+}

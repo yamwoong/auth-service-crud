@@ -85,7 +85,9 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response) =
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
   const refreshToken = getRefreshTokenFromCookie(req);
+
   const authService = Container.get(AuthService);
+
   await authService.logout(refreshToken);
 
   res.clearCookie('refreshToken', {
@@ -139,8 +141,8 @@ export const googleAuthCallback = asyncHandler(async (req: Request, res: Respons
 
   setRefreshTokenCookie(res, refreshToken);
 
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
-  return res.redirect(`${frontendUrl}/dashboard?token=${accessToken}`);
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  return res.redirect(`${frontendUrl}/oauth-success?token=${accessToken}&userId=${user.id}`);
 });
 
 /**

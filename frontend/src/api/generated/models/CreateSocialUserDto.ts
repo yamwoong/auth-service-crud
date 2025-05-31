@@ -3,10 +3,19 @@
 /* tslint:disable */
 /* eslint-disable */
 export type CreateSocialUserDto = {
-  email: string;
-  name: string;
-  username: string;
-  provider: "google";
-  googleId: string;
-  password?: string;
+    email: string;
+    name: string;
+    username: string;
+    provider: CreateSocialUserDto.provider;
+    googleId: string;
+    password?: CreateSocialUserDto.password;
 };
+export namespace CreateSocialUserDto {
+    export enum provider {
+        GOOGLE = 'google',
+    }
+    export enum password {
+        = '',
+    }
+}
+

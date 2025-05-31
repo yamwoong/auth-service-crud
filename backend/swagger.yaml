@@ -3,28 +3,15 @@ info:
   title: Auth Service API
   version: 1.0.0
 
-# ──────────────────────────────────────────────
-# Server Configuration
-# ──────────────────────────────────────────────
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/api
     description: Local development
 
-# ──────────────────────────────────────────────
-# Global Security Requirements
-# ──────────────────────────────────────────────
-security:
-  - bearerAuth: [] # Added global requirement for Bearer JWT
-
 paths:
-  # ──────────────────────────────────────────────
-  # Health-check Endpoint
-  # ──────────────────────────────────────────────
   /ping:
     get:
       summary: Health check
-      tags:
-        - System
+      tags: [System]
       responses:
         '200':
           description: pong
@@ -33,16 +20,10 @@ paths:
               schema:
                 type: string
 
-  # ──────────────────────────────────────────────
-  # User Management Endpoints
-  # ──────────────────────────────────────────────
   /users:
     get:
       summary: Retrieve all users
-      tags:
-        - Users
-      security:
-        - bearerAuth: [] # Added per-endpoint security
+      tags: [Users]
       responses:
         '200':
           description: List of users
@@ -54,8 +35,7 @@ paths:
                   $ref: '#/components/schemas/User'
     post:
       summary: Register a new user
-      tags:
-        - Users
+      tags: [Users]
       requestBody:
         required: true
         content:
@@ -72,16 +52,10 @@ paths:
         '409':
           description: Conflict — email or username already exists
 
-  # ──────────────────────────────────────────────
-  # Retrieve Single User by ID
-  # ──────────────────────────────────────────────
   /users/{id}:
     get:
       summary: Retrieve a single user by ID
-      tags:
-        - Users
-      security:
-        - bearerAuth: [] # Added per-endpoint security
+      tags: [Users]
       parameters:
         - in: path
           name: id
@@ -99,16 +73,10 @@ paths:
         '404':
           description: User not found
 
-  # ──────────────────────────────────────────────
-  # Update Authenticated User's Password
-  # ──────────────────────────────────────────────
   /users/me/password:
     patch:
       summary: Update the authenticated user's password
-      tags:
-        - Users
-      security:
-        - bearerAuth: [] # Added per-endpoint security
+      tags: [Users]
       requestBody:
         required: true
         content:
@@ -127,14 +95,10 @@ paths:
         '401':
           description: Unauthorized — authentication required
 
-  # ──────────────────────────────────────────────
-  # Authentication Endpoints
-  # ──────────────────────────────────────────────
   /auth/login:
     post:
       summary: User login
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -156,20 +120,7 @@ paths:
   /auth/refresh:
     post:
       summary: Refresh access token using refresh token
-      tags:
-        - Auth
-      requestBody: # Added requestBody for refresh token input
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - refreshToken
-              properties:
-                refreshToken:
-                  type: string
-                  description: JWT refresh token
+      tags: [Auth]
       responses:
         '200':
           description: New access token issued
@@ -183,10 +134,7 @@ paths:
   /auth/logout:
     post:
       summary: Log out the user and clear refresh token
-      tags:
-        - Auth
-      security:
-        - bearerAuth: [] # Added per-endpoint security
+      tags: [Auth]
       responses:
         '200':
           description: Logged out successfully
@@ -197,14 +145,10 @@ paths:
         '401':
           description: Unauthorized — authentication required
 
-  # ──────────────────────────────────────────────
-  # Google OAuth2 Endpoints
-  # ──────────────────────────────────────────────
   /auth/google:
     get:
       summary: Redirect to Google OAuth2 login
-      tags:
-        - Auth
+      tags: [Auth]
       responses:
         '302':
           description: Redirect to Google OAuth2 authentication URL
@@ -212,8 +156,7 @@ paths:
   /auth/google/callback:
     get:
       summary: Handle Google OAuth2 callback
-      tags:
-        - Auth
+      tags: [Auth]
       parameters:
         - in: query
           name: code
@@ -231,14 +174,10 @@ paths:
         '400':
           description: Bad Request — authorization code not provided
 
-  # ──────────────────────────────────────────────
-  # Password Reset Endpoints
-  # ──────────────────────────────────────────────
   /auth/forgot-password:
     post:
       summary: Send password reset email
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -258,8 +197,7 @@ paths:
   /auth/reset-password:
     post:
       summary: Reset user's password using token
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -276,16 +214,10 @@ paths:
         '400':
           description: Bad Request — invalid token or fields
 
-  # ──────────────────────────────────────────────
-  # Dashboard Endpoint
-  # ──────────────────────────────────────────────
   /dashboard:
     get:
       summary: Retrieve authenticated user's dashboard
-      tags:
-        - Dashboard
-      security:
-        - bearerAuth: [] # Added per-endpoint security
+      tags: [Dashboard]
       responses:
         '200':
           description: Dashboard data returned
@@ -296,16 +228,10 @@ paths:
         '401':
           description: Unauthorized — authentication required
 
-  # ──────────────────────────────────────────────
-  # Posts Endpoints (Added)
-  # ──────────────────────────────────────────────
   /posts:
     get:
       summary: Get all posts
-      tags:
-        - Posts
-      security:
-        - bearerAuth: [] # Added per-endpoint security
+      tags: [Posts]
       responses:
         '200':
           description: OK
@@ -317,10 +243,9 @@ paths:
                   $ref: '#/components/schemas/Post'
     post:
       summary: Create a new post
-      tags:
-        - Posts
+      tags: [Posts]
       security:
-        - bearerAuth: [] # Added per-endpoint security
+        - bearerAuth: [] # ← 인증 필요 추가
       requestBody:
         required: true
         content:
@@ -336,14 +261,13 @@ paths:
                 $ref: '#/components/schemas/Post'
         '400':
           description: Bad Request — validation failed
+        '401':
+          description: Unauthorized — authentication required # ← 추가
 
   /posts/{id}:
     get:
       summary: Get single post by ID
-      tags:
-        - Posts
-      security:
-        - bearerAuth: [] # Added per-endpoint security
+      tags: [Posts]
       parameters:
         - in: path
           name: id
@@ -362,10 +286,9 @@ paths:
           description: Not Found — post does not exist
     patch:
       summary: Update post by ID
-      tags:
-        - Posts
+      tags: [Posts]
       security:
-        - bearerAuth: [] # Added per-endpoint security
+        - bearerAuth: [] # ← 인증 필요 추가
       parameters:
         - in: path
           name: id
@@ -388,14 +311,15 @@ paths:
                 $ref: '#/components/schemas/Post'
         '400':
           description: Bad Request — validation failed
+        '401':
+          description: Unauthorized — authentication required # ← 추가
         '404':
           description: Not Found — post does not exist
     delete:
       summary: Delete post by ID
-      tags:
-        - Posts
+      tags: [Posts]
       security:
-        - bearerAuth: [] # Added per-endpoint security
+        - bearerAuth: [] # ← 인증 필요 추가
       parameters:
         - in: path
           name: id
@@ -406,21 +330,18 @@ paths:
       responses:
         '204':
           description: No Content — post deleted successfully
+        '401':
+          description: Unauthorized — authentication required # ← 추가
         '404':
           description: Not Found — post does not exist
 
-# ──────────────────────────────────────────────
-# Components
-# ──────────────────────────────────────────────
 components:
-  # Security Schemes
   securitySchemes:
-    bearerAuth:
+    bearerAuth: # ← 인증 스키마 추가
       type: http
       scheme: bearer
-      bearerFormat: JWT # Added
+      bearerFormat: JWT
 
-  # Schemas
   schemas:
     CreateUserDto:
       type: object
@@ -462,48 +383,33 @@ components:
         email: 'default@example.com'
         name: 'Default Name'
 
-    CreatePostDto: # Added
+    CreateSocialUserDto:
       type: object
       required:
-        - title
-        - content
+        - email
+        - name
+        - username
+        - provider
+        - googleId
       properties:
-        title:
+        email:
           type: string
-          example: 'My First Post'
-        content:
+          format: email
+        name:
           type: string
-          example: 'This is the content of my first post.'
-        authorId:
+        username:
           type: string
-          example: '682f3641b6246ad982115d5e'
+        provider:
+          type: string
+          enum:
+            - google
+        googleId:
+          type: string
+        password:
+          type: string
+          enum:
+            - ''
 
-    UpdatePostDto: # Added
-      type: object
-      properties:
-        title:
-          type: string
-        content:
-          type: string
-
-    Post: # Added
-      allOf:
-        - $ref: '#/components/schemas/CreatePostDto'
-        - type: object
-          properties:
-            id:
-              type: string
-              example: '6830aed98b57c828f98b0beb'
-            createdAt:
-              type: string
-              format: date-time
-              example: '2025-05-23T17:22:33.938Z'
-            updatedAt:
-              type: string
-              format: date-time
-              example: '2025-05-23T17:22:33.938Z'
-
-    # Existing schemas for auth, user, etc...
     LoginDto:
       type: object
       required:
@@ -520,6 +426,7 @@ components:
           type: string
           writeOnly: true
           description: User password
+
     LoginResponse:
       type: object
       properties:
@@ -528,12 +435,14 @@ components:
           description: JWT access token
         user:
           $ref: '#/components/schemas/User'
+
     RefreshTokenResponse:
       type: object
       properties:
         accessToken:
           type: string
           description: New JWT access token
+
     ForgotPasswordDto:
       type: object
       required:
@@ -542,6 +451,7 @@ components:
         username:
           type: string
           description: Username or email to send reset link
+
     ResetPasswordDto:
       type: object
       required:
@@ -554,6 +464,7 @@ components:
         newPassword:
           type: string
           description: New password for the user
+
     UpdatePasswordDto:
       type: object
       required:
@@ -566,12 +477,14 @@ components:
         newPassword:
           type: string
           description: New password to set
+
     ResponseMessage:
       type: object
       properties:
         message:
           type: string
           description: Informational message
+
     DashboardResponse:
       type: object
       properties:
@@ -579,3 +492,38 @@ components:
           type: string
         user:
           $ref: '#/components/schemas/User'
+
+    CreatePostDto:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: string
+
+    UpdatePostDto:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+
+    Post:
+      allOf:
+        - $ref: '#/components/schemas/CreatePostDto'
+        - type: object
+          properties:
+            id:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time

@@ -9,7 +9,7 @@ const LogoutButton = () => {
     try {
       // 1) Send logout API request
       await axios.post(
-        "http://localhost:3000/auth/logout",
+        "http://localhost:3000/api/auth/logout",
         {},
         { withCredentials: true }
       );

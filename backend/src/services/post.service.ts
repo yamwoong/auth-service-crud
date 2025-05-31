@@ -3,6 +3,7 @@ import { BaseService } from '@services/base.service';
 import { PostRepository } from '@repositories/post.repository';
 import { AppError } from '@errors/AppError';
 import { POST_ERRORS } from '@constants/errors';
+import { checkOwnership } from '@utils/checkOwnership';
 import type { PostDocument } from '@models/post.model';
 import type { CreatePostDto } from '@dtos/post/create-post.dto';
 import type { UpdatePostDto } from '@dtos/post/update-post.dto';
@@ -24,20 +25,23 @@ export class PostService extends BaseService<PostDocument, CreatePostDto, Update
    * @throws {AppError} 409 if a post with the same title already exists
    * @returns The created PostDocument
    */
-  async create(data: CreatePostDto): Promise<PostDocument> {
+  async createPost(data: Omit<CreatePostDto, 'authorId'>, authorId: string): Promise<PostDocument> {
     // 1) Title length validation
     if (data.title.length < 3) {
       throw new AppError(POST_ERRORS.INVALID_TITLE, 400);
     }
 
-    // 2) Unique‐title rule
+    // 2) Unique-title rule
     const exists = await this.repository.findByTitle(data.title);
     if (exists) {
       throw new AppError(POST_ERRORS.DUPLICATE_TITLE, 409);
     }
 
-    // 3) Delegate to BaseService#create for persistence
-    return super.create(data);
+    // 3) Save post, with authorId injected by the server
+    return super.create({
+      ...data,
+      authorId,
+    } as CreatePostDto);
   }
 
   /**
@@ -65,10 +69,14 @@ export class PostService extends BaseService<PostDocument, CreatePostDto, Update
    * @throws {AppError} 400 if no update fields provided
    * @returns The updated PostDocument
    */
-  async update(id: string, data: UpdatePostDto): Promise<PostDocument> {
+  async updatePost(id: string, data: UpdatePostDto, userId: string): Promise<PostDocument> {
     if (Object.keys(data).length === 0) {
       throw new AppError(POST_ERRORS.NO_UPDATE_FIELDS, 400);
     }
+
+    const post = await this.findByIdOrFail(id);
+    checkOwnership(post.authorId.toString(), userId);
+
     return super.update(id, data);
   }
 
@@ -77,7 +85,10 @@ export class PostService extends BaseService<PostDocument, CreatePostDto, Update
    * @param id - String ID of the post to delete
    * @returns void
    */
-  async delete(id: string): Promise<void> {
+  async deletePost(id: string, userId: string): Promise<void> {
+    const post = await this.findByIdOrFail(id);
+    checkOwnership(post.authorId.toString(), userId);
+
     await super.delete(id);
   }
 

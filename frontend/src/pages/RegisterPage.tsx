@@ -3,7 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import styles from "../components/LoginForm.module.css";
 import { UsersService } from "../api/generated/services/UsersService";
 import type { CreateUserDto } from "../api/generated/models/CreateUserDto";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 
+// Type for managing form state
 interface FormState {
   username: string;
   name: string;
@@ -15,6 +18,7 @@ interface FormState {
 export default function RegisterPage() {
   const navigate = useNavigate();
 
+  // Form field state
   const [form, setForm] = useState<FormState>({
     username: "",
     name: "",
@@ -23,17 +27,18 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
-  // Field-specific error messages
+  // State for field-specific error messages
   const [errors, setErrors] = useState<
     Partial<Record<keyof FormState, string>>
   >({});
-  // General server error
+  // State for general server-side API error
   const [apiError, setApiError] = useState<string | null>(null);
 
+  // Validate form fields before submitting
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof FormState, string>> = {};
 
-    // USERNAME validations
+    // Username validation
     if (!form.username.trim()) {
       newErrors.username = "Please enter a username.";
     } else if (form.username.length < 3) {
@@ -42,26 +47,26 @@ export default function RegisterPage() {
       newErrors.username = "Username must be at most 30 characters.";
     }
 
-    // NAME validation
+    // Name validation
     if (!form.name.trim()) {
       newErrors.name = "Please enter your full name.";
     }
 
-    // EMAIL validations
+    // Email validation
     if (!form.email.trim()) {
       newErrors.email = "Please enter your email address.";
     } else if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]{2,}$/.test(form.email)) {
       newErrors.email = "Please enter a valid email address.";
     }
 
-    // PASSWORD validations
+    // Password validation
     if (!form.password) {
       newErrors.password = "Please enter a password.";
     } else if (form.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters.";
     }
 
-    // CONFIRM PASSWORD validation
+    // Confirm password validation
     if (!form.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password.";
     } else if (form.confirmPassword !== form.password) {
@@ -72,14 +77,15 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Update form state when user changes any input field
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    // Clear field error and general API error on change
     setErrors((prev) => ({ ...prev, [name]: undefined }));
     setApiError(null);
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
@@ -96,7 +102,7 @@ export default function RegisterPage() {
       await UsersService.postUsers(dto);
       navigate("/login");
     } catch (err: unknown) {
-      // Handle server-side validation errors if provided
+      // Handle possible server-side validation errors
       if (
         err &&
         typeof err === "object" &&
@@ -124,7 +130,6 @@ export default function RegisterPage() {
           });
           setErrors(fieldErrors);
         }
-        // Always show general error too
         setApiError(apiErr.body?.message || "Registration failed.");
       } else {
         setApiError("An unexpected error occurred.");
@@ -143,14 +148,13 @@ export default function RegisterPage() {
         {/* General API error */}
         {apiError && <p className={styles.error}>{apiError}</p>}
 
-        {/* USERNAME */}
+        {/* USERNAME FIELD */}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Username</label>
-          <input
+          <Input
             type="text"
             name="username"
             placeholder="Your username"
-            className={styles.input}
             value={form.username}
             onChange={handleChange}
             required
@@ -158,14 +162,13 @@ export default function RegisterPage() {
           {errors.username && <p className={styles.error}>{errors.username}</p>}
         </div>
 
-        {/* NAME */}
+        {/* FULL NAME FIELD */}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Full Name</label>
-          <input
+          <Input
             type="text"
             name="name"
             placeholder="John Doe"
-            className={styles.input}
             value={form.name}
             onChange={handleChange}
             required
@@ -173,14 +176,13 @@ export default function RegisterPage() {
           {errors.name && <p className={styles.error}>{errors.name}</p>}
         </div>
 
-        {/* EMAIL */}
+        {/* EMAIL FIELD */}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Email</label>
-          <input
+          <Input
             type="email"
             name="email"
             placeholder="name@example.com"
-            className={styles.input}
             value={form.email}
             onChange={handleChange}
             required
@@ -188,14 +190,13 @@ export default function RegisterPage() {
           {errors.email && <p className={styles.error}>{errors.email}</p>}
         </div>
 
-        {/* PASSWORD */}
+        {/* PASSWORD FIELD */}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Password</label>
-          <input
+          <Input
             type="password"
             name="password"
             placeholder="********"
-            className={styles.input}
             value={form.password}
             onChange={handleChange}
             required
@@ -203,14 +204,13 @@ export default function RegisterPage() {
           {errors.password && <p className={styles.error}>{errors.password}</p>}
         </div>
 
-        {/* CONFIRM PASSWORD */}
+        {/* CONFIRM PASSWORD FIELD */}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Confirm Password</label>
-          <input
+          <Input
             type="password"
             name="confirmPassword"
             placeholder="********"
-            className={styles.input}
             value={form.confirmPassword}
             onChange={handleChange}
             required
@@ -220,20 +220,22 @@ export default function RegisterPage() {
           )}
         </div>
 
-        <button type="submit" className={styles.button}>
+        {/* Submit button using the common Button component */}
+        <Button type="submit" variant="primary">
           Sign Up
-        </button>
+        </Button>
 
         <div className={styles.divider}></div>
 
-        <button type="button" className={styles.googleButton} disabled>
+        {/* Google registration button (disabled for now) */}
+        <Button type="button" variant="google" disabled>
           <img
             className={styles.googleIcon}
             src="https://www.svgrepo.com/show/475656/google-color.svg"
             alt="Google"
           />
           Continue with Google
-        </button>
+        </Button>
 
         <div className={styles.footer}>
           Already have an account? <Link to="/login">Log In</Link>

@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import styles from "../components/ForgotPasswordForm.module.css";
 import { AuthService } from "../api/generated/services/AuthService";
 import type { ForgotPasswordDto } from "../api/generated/models/ForgotPasswordDto";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 
 export default function ForgotPasswordPage() {
   const [username, setUsername] = useState("");
@@ -46,19 +48,18 @@ export default function ForgotPasswordPage() {
 
             <div className={styles.inputGroup}>
               <label className={styles.label}>Username</label>
-              <input
+              <Input
                 type="text"
                 placeholder="Enter your username"
-                className={styles.input}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
 
-            <button type="submit" className={styles.button}>
+            <Button type="submit" variant="primary">
               Send Email
-            </button>
+            </Button>
           </>
         )}
 

@@ -20,14 +20,11 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-  BASE: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
+  BASE: "http://localhost:3000/api",
   VERSION: "1.0.0",
   WITH_CREDENTIALS: true,
   CREDENTIALS: "include",
-  TOKEN: async () => {
-    const token = localStorage.getItem("token");
-    return token ? `Bearer ${token}` : "";
-  },
+  TOKEN: async () => localStorage.getItem("token") || "",
   USERNAME: undefined,
   PASSWORD: undefined,
   HEADERS: undefined,

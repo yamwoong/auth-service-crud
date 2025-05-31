@@ -1,0 +1,45 @@
+.button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.17s;
+}
+
+.primary {
+  background: #2563eb;
+  color: #fff;
+}
+.primary:hover {
+  background: #1d4ed8;
+}
+
+.secondary {
+  background: #e5e7eb;
+  color: #222;
+}
+.secondary:hover {
+  background: #cbd5e1;
+}
+
+.danger {
+  background: #ef4444;
+  color: #fff;
+}
+.danger:hover {
+  background: #dc2626;
+}
+
+.google {
+  background: #fff;
+  color: #222;
+  border: 1.2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.google:hover {
+  background: #f3f4f6;
+}
