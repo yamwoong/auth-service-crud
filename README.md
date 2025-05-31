@@ -8,8 +8,6 @@ It showcases my ability to build secure and scalable backend systems by implemen
 - Password recovery via Gmail  
 - Automated CI/CD deployment to AWS EC2
 
----
-
 ## 🚀 Key Features
 
 - **JWT-based Authentication**  
@@ -159,4 +157,4 @@ backend/
 └── tsconfig.json             # TypeScript compiler configuration
 ```
 
-> ✅ Test files are grouped under `tests/__tests__`, and all source modules follow a clear layered structure (Controller → Service → Repository) for scalability and maintainability.
+> Test files are grouped under `tests/__tests__`, and all source modules follow a clear layered structure (Controller → Service → Repository) for scalability and maintainability.
