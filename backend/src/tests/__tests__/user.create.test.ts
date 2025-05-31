@@ -1,4 +1,3 @@
-// tests/__tests__/posts.e2e.test.ts
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -27,14 +26,14 @@ describe('Posts API CRUD (In-Memory DB)', () => {
   });
 
   it('POST /api/posts → 201 Created', async () => {
-    // dynamic dummy
+    // Create a dummy post DTO (without authorId)
     const dto = createDummyPost();
     const res = await request(app).post('/api/posts').send(dto).expect(201);
 
     expect(res.body).toMatchObject({
       title: dto.title,
       content: dto.content,
-      authorId: dto.authorId,
+      // authorId is not checked here since it's assigned by backend
     });
     postId = res.body.id;
   });
@@ -51,7 +50,7 @@ describe('Posts API CRUD (In-Memory DB)', () => {
   });
 
   it('PATCH /api/posts/:id → 200 OK', async () => {
-    // fixed update DTO
+    // Use fixed update DTO (no authorId)
     const updateDto = TEST_UPDATE_POST;
     const res = await request(app).patch(`/api/posts/${postId}`).send(updateDto).expect(200);
 

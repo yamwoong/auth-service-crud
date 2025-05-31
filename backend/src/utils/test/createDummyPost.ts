@@ -1,32 +1,26 @@
-// utils/test/createDummyPost.ts
 import { CreatePostDto } from '@dtos/post/create-post.dto';
-import { UpdatePostDto } from '@dtos/post/update-post.dto';
-import { randomUUID } from 'crypto';
 
 /**
- * Factory function to generate a dummy CreatePostDto
- * @param overrides Optional fields to override default values
- * @returns A CreatePostDto with default or overridden values
+ * Returns dummy post data for creating a new post.
+ * You can override fields by passing an object as the argument.
+ * Note: authorId is not included, since it should be set by the backend (authenticated user).
  */
-export function createDummyPost(overrides?: Partial<CreatePostDto>): CreatePostDto {
+export function createDummyPost(overrides?: Partial<CreatePostDto>) {
   return {
-    title: overrides?.title ?? `Test Title ${Date.now()}`,
-    content: overrides?.content ?? `This is test post content at ${new Date().toISOString()}`,
-    authorId: overrides?.authorId ?? randomUUID(),
-    ...overrides,
+    title: 'Test Title',
+    content: 'Test Content',
+    ...overrides, // Allows for field overrides if needed
   };
 }
 
 /**
- * Factory function to generate a dummy UpdatePostDto
- * @param overrides Optional fields to override default values
- * @returns An UpdatePostDto with default or overridden values
+ * Returns dummy data for updating a post.
+ * You can override fields by passing an object as the argument.
  */
-export function createDummyUpdatePost(overrides?: Partial<UpdatePostDto>): UpdatePostDto {
+export function createDummyUpdatePost(overrides?: Partial<CreatePostDto>) {
   return {
-    title: overrides?.title ?? `Updated Title ${Date.now()}`,
-    content:
-      overrides?.content ?? `This is updated test post content at ${new Date().toISOString()}`,
+    title: 'Updated Title',
+    content: 'Updated Content',
     ...overrides,
   };
 }
