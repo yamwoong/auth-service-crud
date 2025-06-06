@@ -37,11 +37,8 @@ export class PostService extends BaseService<PostDocument, CreatePostDto, Update
       throw new AppError(POST_ERRORS.DUPLICATE_TITLE, 409);
     }
 
-    // 3) Save post, with authorId injected by the server
-    return super.create({
-      ...data,
-      authorId,
-    } as CreatePostDto);
+    // 3) Use repository's createWithAuthor for safe author injection
+    return this.repository.createWithAuthor(data, authorId);
   }
 
   /**

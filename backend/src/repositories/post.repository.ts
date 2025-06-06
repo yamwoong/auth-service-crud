@@ -31,17 +31,31 @@ export class PostRepository extends BaseRepository<PostDocument, CreatePostDto, 
   }
 
   /**
-   * Creates a new Post document.
-   * @param data - DTO containing the data to create a post
+   * Creates a new post.
+   * NOTE: This does NOT match the BaseRepository signature and should be renamed to createWithAuthor in practice.
+   * @param data - DTO containing the post data (title, content)
+   * @param authorId - The ObjectId string of the post author (from authenticated user)
    * @returns Promise resolving to the created PostDocument
    */
-  async create(data: CreatePostDto): Promise<PostDocument> {
-    const authorObjId = this.toObjectId(data.authorId);
+
+  async createWithAuthor(data: CreatePostDto, authorId: string): Promise<PostDocument> {
+    const authorObjId = this.toObjectId(authorId);
+
     return PostModel.create({
       title: data.title,
       content: data.content,
       authorId: authorObjId,
     });
+  }
+
+  /**
+   * Implements BaseRepository create method.
+   * Only use for testing, seeding, or when authorId is included in data.
+   * @param data - DTO containing all fields for a post, including authorId
+   * @returns Promise resolving to the created PostDocument
+   */
+  async create(data: CreatePostDto): Promise<PostDocument> {
+    return PostModel.create(data);
   }
 
   /**
