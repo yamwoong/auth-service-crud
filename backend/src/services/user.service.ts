@@ -39,12 +39,14 @@ export class UserService {
       throw new UserAlreadyExistsError(identifier);
     }
 
+    if (!data.password) {
+      throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS, 400);
+    }
+
     const hashed = await hashPassword(data.password);
 
-    // 1️⃣ raw MongoUser 받기
     const created = await this.userRepository.create({ ...data, password: hashed });
 
-    // 2️⃣ 매핑 후 반환
     return mapMongoUserToUser(created);
   }
 
@@ -109,7 +111,7 @@ export class UserService {
     const existingUser = await this.userRepository.findByEmail(email);
 
     if (existingUser) {
-      return mapMongoGoogleUserToUser(existingUser); // ✅ 소셜 유저용 매퍼 사용
+      return mapMongoGoogleUserToUser(existingUser);
     }
 
     const username = email.split('@')[0];
@@ -120,10 +122,9 @@ export class UserService {
       username,
       provider: 'google',
       googleId,
-      password: '',
     };
 
     const created = await this.userRepository.create(socialUser);
-    return mapMongoGoogleUserToUser(created); // ✅ 동일하게 적용
+    return mapMongoGoogleUserToUser(created);
   }
 }

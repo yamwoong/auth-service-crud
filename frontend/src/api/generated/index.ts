@@ -9,7 +9,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { CreatePostDto } from './models/CreatePostDto';
 export { CreateSocialUserDto } from './models/CreateSocialUserDto';
-export type { CreateUserDto } from './models/CreateUserDto';
+export { CreateUserDto } from './models/CreateUserDto';
 export type { DashboardResponse } from './models/DashboardResponse';
 export type { ForgotPasswordDto } from './models/ForgotPasswordDto';
 export type { LoginDto } from './models/LoginDto';

@@ -349,7 +349,6 @@ components:
         - username
         - email
         - name
-        - password
       properties:
         username:
           type: string
@@ -360,9 +359,20 @@ components:
           description: Unique email address
         name:
           type: string
+        provider:
+          type: string
+          enum: [local, google]
+          default: local
+          description: Signup provider. If 'local', password is required. If 'google', password must NOT be present.
         password:
           type: string
           writeOnly: true
+          minLength: 6
+          nullable: true
+          description: "Required if provider is 'local'. Forbidden if provider is 'google'."
+        googleId:
+          type: string
+          description: "Google unique user ID (required if provider is 'google')"
 
     User:
       type: object
@@ -401,14 +411,9 @@ components:
           type: string
         provider:
           type: string
-          enum:
-            - google
+          enum: [google]
         googleId:
           type: string
-        password:
-          type: string
-          enum:
-            - ''
 
     LoginDto:
       type: object

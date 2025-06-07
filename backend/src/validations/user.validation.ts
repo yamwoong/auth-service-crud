@@ -15,9 +15,15 @@ export const createUserSchema = Joi.object({
     'any.required': 'Name is required',
   }),
 
-  password: Joi.string().min(6).required().messages({
-    'any.required': 'Password is required',
-    'string.min': 'Password must be at least 6 characters',
+  provider: Joi.string().valid('local', 'google').default('local'),
+
+  password: Joi.when('provider', {
+    is: 'local',
+    then: Joi.string().min(6).required().messages({
+      'any.required': 'Password is required',
+      'string.min': 'Password must be at least 6 characters',
+    }),
+    otherwise: Joi.forbidden(),
   }),
 });
 

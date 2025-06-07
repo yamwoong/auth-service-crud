@@ -8,5 +8,4 @@ export interface CreateSocialUserDto {
   username: string;
   provider: 'google';
   googleId: string;
-  password: '';
 }

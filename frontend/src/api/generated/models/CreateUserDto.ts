@@ -12,6 +12,26 @@ export type CreateUserDto = {
      */
     email: string;
     name: string;
-    password: string;
+    /**
+     * Signup provider. If 'local', password is required. If 'google', password must NOT be present.
+     */
+    provider?: CreateUserDto.provider;
+    /**
+     * Required if provider is 'local'. Forbidden if provider is 'google'.
+     */
+    password?: string | null;
+    /**
+     * Google unique user ID (required if provider is 'google')
+     */
+    googleId?: string;
 };
+export namespace CreateUserDto {
+    /**
+     * Signup provider. If 'local', password is required. If 'google', password must NOT be present.
+     */
+    export enum provider {
+        LOCAL = 'local',
+        GOOGLE = 'google',
+    }
+}
 

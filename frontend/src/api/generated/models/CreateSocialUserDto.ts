@@ -8,14 +8,10 @@ export type CreateSocialUserDto = {
     username: string;
     provider: CreateSocialUserDto.provider;
     googleId: string;
-    password?: CreateSocialUserDto.password;
 };
 export namespace CreateSocialUserDto {
     export enum provider {
         GOOGLE = 'google',
-    }
-    export enum password {
-        = '',
     }
 }
 
