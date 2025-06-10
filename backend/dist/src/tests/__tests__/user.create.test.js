@@ -3,80 +3,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const typedi_1 = require("typedi");
-const user_service_1 = require("@services/user.service");
-const createDummyUser_1 = require("@test-utils/createDummyUser");
-const test_user_1 = require("@test-utils/test-user");
 const supertest_1 = __importDefault(require("supertest"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const mongodb_memory_server_1 = require("mongodb-memory-server");
 const app_1 = __importDefault(require("../../app"));
-describe('UserService - createUser (success)', () => {
-    let userService;
-    // Inject a fresh instance before each test
-    beforeEach(() => {
-        userService = typedi_1.Container.get(user_service_1.UserService);
+const createDummyPost_1 = require("../../utils/test/createDummyPost");
+const test_post_1 = require("../../utils/test/test-post");
+describe('Posts API CRUD (In-Memory DB)', () => {
+    let mongod;
+    let postId;
+    beforeAll(async () => {
+        mongod = await mongodb_memory_server_1.MongoMemoryServer.create();
+        await mongoose_1.default.connect(mongod.getUri(), { dbName: 'jest' });
     });
-    /**
-     * @route   POST /users
-     * @desc    Should create a user and return safe user data
-     * @access  Public
-     */
-    it('should create a user and return safe user data', async () => {
-        // Arrange: create a dummy user DTO with test email
-        const dto = (0, createDummyUser_1.createDummyUser)({ email: test_user_1.TEST_USER_EMAIL });
-        // Act: attempt to create the user via the service
-        const user = await userService.createUser(dto);
-        // Assert 1: returned user should match input data (excluding password)
-        expect(user).toMatchObject({
-            username: test_user_1.TEST_USER_USERNAME,
-            email: test_user_1.TEST_USER_EMAIL,
-            name: test_user_1.TEST_USER_NAME,
-        });
-        // Assert 2: should have an 'id' field (converted from _id by the mapper)
-        expect(user).toHaveProperty('id');
-        // Assert 3: should NOT include 'password' in the final response model
-        expect('password' in user).toBe(false);
+    afterEach(async () => {
+        for (const col of Object.values(mongoose_1.default.connection.collections)) {
+            await col.deleteMany({});
+        }
     });
-});
-describe('UserService - createUser (validation fails)', () => {
-    /**
-     * @route   POST /users
-     * @desc    Should return 400 if username is missing
-     * @access  Public
-     */
-    it('should return 400 when username is missing', async () => {
-        const res = await (0, supertest_1.default)(app_1.default).post('/users').send({
-            email: 'test@example.com',
-            name: 'Test Name',
-            password: 'secret123',
-        });
-        expect(res.status).toBe(400);
+    afterAll(async () => {
+        await mongoose_1.default.disconnect();
+        await mongod.stop();
     });
-    /**
-     * @route   POST /users
-     * @desc    Should return 400 if email is invalid
-     * @access  Public
-     */
-    it('should return 400 when email is invalid', async () => {
-        const res = await (0, supertest_1.default)(app_1.default).post('/users').send({
-            username: 'tester',
-            email: 'not-an-email',
-            name: 'Test Name',
-            password: 'secret123',
+    it('POST /api/posts → 201 Created', async () => {
+        // Create a dummy post DTO (without authorId)
+        const dto = (0, createDummyPost_1.createDummyPost)();
+        const res = await (0, supertest_1.default)(app_1.default).post('/api/posts').send(dto).expect(201);
+        expect(res.body).toMatchObject({
+            title: dto.title,
+            content: dto.content,
+            // authorId is not checked here since it's assigned by backend
         });
-        expect(res.status).toBe(400);
+        postId = res.body.id;
     });
-    /**
-     * @route   POST /users
-     * @desc    Should return 400 if password is too short
-     * @access  Public
-     */
-    it('should return 400 when password is too short', async () => {
-        const res = await (0, supertest_1.default)(app_1.default).post('/users').send({
-            username: 'tester',
-            email: 'test@example.com',
-            name: 'Test Name',
-            password: '123',
-        });
-        expect(res.status).toBe(400);
+    it('GET /api/posts → 200 OK & array', async () => {
+        const res = await (0, supertest_1.default)(app_1.default).get('/api/posts').expect(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBeGreaterThanOrEqual(1);
+    });
+    it('GET /api/posts/:id → 200 OK', async () => {
+        await (0, supertest_1.default)(app_1.default).get(`/api/posts/${postId}`).expect(200);
+    });
+    it('PATCH /api/posts/:id → 200 OK', async () => {
+        // Use fixed update DTO (no authorId)
+        const updateDto = test_post_1.TEST_UPDATE_POST;
+        const res = await (0, supertest_1.default)(app_1.default).patch(`/api/posts/${postId}`).send(updateDto).expect(200);
+        expect(res.body.title).toBe(updateDto.title);
+        expect(res.body.content).toBe(updateDto.content);
+    });
+    it('DELETE /api/posts/:id → 204 No Content', async () => {
+        await (0, supertest_1.default)(app_1.default).delete(`/api/posts/${postId}`).expect(204);
     });
 });

@@ -17,9 +17,14 @@ exports.createUserSchema = joi_1.default.object({
     name: joi_1.default.string().required().messages({
         'any.required': 'Name is required',
     }),
-    password: joi_1.default.string().min(6).required().messages({
-        'any.required': 'Password is required',
-        'string.min': 'Password must be at least 6 characters',
+    provider: joi_1.default.string().valid('local', 'google').default('local'),
+    password: joi_1.default.when('provider', {
+        is: 'local',
+        then: joi_1.default.string().min(6).required().messages({
+            'any.required': 'Password is required',
+            'string.min': 'Password must be at least 6 characters',
+        }),
+        otherwise: joi_1.default.forbidden(),
     }),
 });
 exports.updatePasswordSchema = joi_1.default.object({

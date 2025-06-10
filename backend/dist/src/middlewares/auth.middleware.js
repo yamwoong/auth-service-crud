@@ -54,7 +54,6 @@ const authMiddleware = async (req, res, next) => {
         let payload;
         try {
             payload = jsonwebtoken_1.default.verify(token, env_1.env.jwtSecret);
-            console.log('✅ Decoded payload:', payload);
         }
         catch (err) {
             if (err instanceof jsonwebtoken_1.JsonWebTokenError) {

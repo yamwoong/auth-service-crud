@@ -25,6 +25,7 @@ const config = {
         '^@schemas/(.*)$': '<rootDir>/schemas/$1',
         '^@mappers/(.*)$': '<rootDir>/mappers/$1',
         '^@interfaces/(.*)$': '<rootDir>/interfaces/$1',
+        '^@types/(.*)$': '<rootDir>/types/$1',
     },
     collectCoverage: true,
     coverageDirectory: '../coverage',

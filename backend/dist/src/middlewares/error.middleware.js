@@ -9,6 +9,9 @@ const joi_1 = require("joi");
  * - Logs and returns a 500 Internal Server Error for unexpected errors.
  */
 const errorMiddleware = (err, _req, res, _next) => {
+    if (res.headersSent) {
+        return;
+    }
     if (err instanceof joi_1.ValidationError) {
         res.status(400).json({
             status: 'error',
@@ -24,7 +27,6 @@ const errorMiddleware = (err, _req, res, _next) => {
         });
         return;
     }
-    console.error('Unexpected error:', err);
     res.status(500).json({
         status: 'error',
         message: 'Internal Server Error',

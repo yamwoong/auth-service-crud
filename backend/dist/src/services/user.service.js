@@ -42,10 +42,11 @@ let UserService = class UserService {
             const identifier = conflict === 'email' ? data.email : data.username;
             throw new UserAlreadyExistsError_1.UserAlreadyExistsError(identifier);
         }
+        if (!data.password) {
+            throw new AppError_1.AppError(errors_1.AUTH_ERRORS.INVALID_CREDENTIALS, 400);
+        }
         const hashed = await (0, hash_1.hashPassword)(data.password);
-        // 1️⃣ raw MongoUser 받기
         const created = await this.userRepository.create({ ...data, password: hashed });
-        // 2️⃣ 매핑 후 반환
         return (0, user_mapper_1.mapMongoUserToUser)(created);
     }
     /**
@@ -91,7 +92,7 @@ let UserService = class UserService {
     async findOrCreateGoogleUser(email, name, googleId) {
         const existingUser = await this.userRepository.findByEmail(email);
         if (existingUser) {
-            return (0, user_mapper_1.mapMongoGoogleUserToUser)(existingUser); // ✅ 소셜 유저용 매퍼 사용
+            return (0, user_mapper_1.mapMongoGoogleUserToUser)(existingUser);
         }
         const username = email.split('@')[0];
         const socialUser = {
@@ -100,10 +101,9 @@ let UserService = class UserService {
             username,
             provider: 'google',
             googleId,
-            password: '',
         };
         const created = await this.userRepository.create(socialUser);
-        return (0, user_mapper_1.mapMongoGoogleUserToUser)(created); // ✅ 동일하게 적용
+        return (0, user_mapper_1.mapMongoGoogleUserToUser)(created);
     }
 };
 exports.UserService = UserService;

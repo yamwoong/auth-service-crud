@@ -108,7 +108,8 @@ exports.googleAuthCallback = (0, asyncHandler_1.asyncHandler)(async (req, res) =
     const refreshTokenRepo = typedi_1.Container.get(refreshToken_repository_1.RefreshTokenRepository);
     await refreshTokenRepo.saveToken(user.id, refreshToken);
     (0, cookies_1.setRefreshTokenCookie)(res, refreshToken);
-    res.redirect(`http://localhost:5173/oauth-success?token=${accessToken}`);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    return res.redirect(`${frontendUrl}/oauth-success?token=${accessToken}&userId=${user.id}`);
 });
 /**
  * @route   POST /auth/forgot-password
