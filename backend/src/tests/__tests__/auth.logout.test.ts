@@ -7,12 +7,11 @@ import { createDummyUserWithHashedPassword } from '@test-utils/createDummyUserWi
 describe('POST /auth/logout', () => {
   it('should successfully logout with valid tokens', async () => {
     const dto = await createDummyUserWithHashedPassword();
-    const hashed = await hashPassword(dto.password);
     await UserModel.create({
       username: dto.username,
       email: dto.email,
       name: dto.name,
-      password: hashed,
+      password: dto.password,
     });
 
     const loginRes = await request(app)
@@ -44,12 +43,11 @@ describe('POST /auth/logout', () => {
 
   it('should return 401 when reusing a revoked token', async () => {
     const dto = await createDummyUserWithHashedPassword();
-    const hashed = await hashPassword(dto.password);
     await UserModel.create({
       username: dto.username,
       email: dto.email,
       name: dto.name,
-      password: hashed,
+      password: dto.password,
     });
 
     const loginRes = await request(app)
