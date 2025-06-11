@@ -43,7 +43,6 @@ export default function DashboardPage() {
 
     const fetchUser = async () => {
       try {
-        console.log("Fetching dashboard data...");
         const res = await DashboardService.getDashboard();
         if (res.user) {
           setUser(res.user);
