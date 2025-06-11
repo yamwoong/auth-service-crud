@@ -66,7 +66,6 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     const apiBase = import.meta.env.VITE_API_BASE_URL;
-    console.log("API Base URL:", apiBase);
     if (!apiBase) {
       console.error("VITE_API_BASE_URL is not defined");
       return;
