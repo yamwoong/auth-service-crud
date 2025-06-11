@@ -8,14 +8,8 @@ export default function OAuthSuccessPage() {
 
   useEffect(() => {
     if (token && userId) {
-      console.log("받은 토큰:", token);
-      console.log("받은 userId:", userId);
-
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
-
-      console.log("localStorage token:", localStorage.getItem("token"));
-      console.log("localStorage userId:", localStorage.getItem("userId"));
 
       window.location.href = `${window.location.origin}/dashboard`;
     } else {
