@@ -13,6 +13,8 @@ export const buildGoogleOAuthURL = (): string => {
   const clientId = env.googleClientId;
   const redirectUri = env.googleCallbackUrl;
 
+  console.log('현재 redirect_uri 값:', redirectUri);
+
   const scope = [
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email',
