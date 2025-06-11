@@ -24,7 +24,11 @@ useContainer(Container);
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:8080'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:8080',
+  'http://13.53.162.140.nip.io:8080',
+];
 
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
