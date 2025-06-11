@@ -45,7 +45,7 @@ export default function PostListPage() {
       </div>
       <PostList
         posts={posts
-          .filter((p) => !!p.id && !!p.title && !!p.content) // 필수값 체크!
+          .filter((p) => !!p.id && !!p.title && !!p.content)
           .map((p) => ({
             ...p,
             id: p.id as string,
