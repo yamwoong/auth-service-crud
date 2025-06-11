@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
-console.log('[app.ts] GOOGLE_CALLBACK_URL  ::', process.env.GOOGLE_CALLBACK_URL);
+console.log('[app.ts] GOOGLE_CALLBACK_UR L  ::', process.env.GOOGLE_CALLBACK_URL);
 console.log('[app.ts] FRONTEND_UR L ::', process.env.FRONTEND_URL);
 
 import 'reflect-metadata';
